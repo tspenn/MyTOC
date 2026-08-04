@@ -3,8 +3,8 @@ import type { DashboardChecklist } from '../lib/types'
 
 const STATUS_LABELS: Record<string, string> = {
   active:                'Active',
-  awaiting_confirmation: 'Awaiting Review',
-  archived:              'Archived',
+  awaiting_confirmation: 'Awaiting Confirm',
+  archived:              'Confirmed',
 }
 
 const STATUS_EMOJI: Record<string, string> = {
@@ -52,7 +52,7 @@ export default function ChecklistCard({
         )}
         <dl className="checklist-meta">
           <div>
-            <dt>Tasks</dt>
+            <dt>Items</dt>
             <dd>{checklist.item_count}</dd>
           </div>
           <div>
@@ -68,11 +68,11 @@ export default function ChecklistCard({
 
       <div className="button-row">
         <Link to={`/checklist/${checklist.id}`} className="btn btn-primary btn-sm">
-          Open Order
+          Open Directive
         </Link>
         {onShare && (
           <button type="button" className="btn btn-secondary btn-sm" onClick={() => onShare(checklist.id)}>
-            👥 Assign
+            Assign
           </button>
         )}
         {onConfirm && (
@@ -82,7 +82,7 @@ export default function ChecklistCard({
         )}
         {onReject && (
           <button type="button" className="btn btn-secondary btn-sm" onClick={() => onReject(checklist.id)}>
-            ↩ Reject
+            ↩ Send back
           </button>
         )}
         {onDelete && (
@@ -90,7 +90,7 @@ export default function ChecklistCard({
             type="button"
             className="btn btn-danger btn-sm"
             onClick={() => {
-              if (window.confirm('Delete this order?')) onDelete(checklist.id)
+              if (window.confirm('Delete this directive?')) onDelete(checklist.id)
             }}
           >
             Delete

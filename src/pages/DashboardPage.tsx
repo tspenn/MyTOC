@@ -8,9 +8,9 @@ import { useDashboardStore } from '../stores/dashboardStore'
 import type { CardStatus } from '../lib/types'
 
 const STATUS_TABS: { value: CardStatus; label: string; emoji: string }[] = [
-  { value: 'active',                label: 'Active',               emoji: '🟢' },
-  { value: 'awaiting_confirmation', label: 'Awaiting Review',      emoji: '🟡' },
-  { value: 'archived',              label: 'Archive',              emoji: '📁' },
+  { value: 'active',                label: 'Active',            emoji: '🟢' },
+  { value: 'awaiting_confirmation', label: 'Awaiting Confirm',  emoji: '🟡' },
+  { value: 'archived',              label: 'Confirmed',         emoji: '📁' },
 ]
 
 export default function DashboardPage() {
@@ -35,7 +35,6 @@ export default function DashboardPage() {
   const checklists    = allChecklists.filter((c) => c.status === activeTab)
   const awaitingCount = allChecklists.filter((c) => c.status === 'awaiting_confirmation').length
 
-  // Pre-select tab from URL param e.g. /dashboard?tab=archived
   useEffect(() => {
     const tab = searchParams.get('tab') as CardStatus | null
     if (tab && ['active', 'awaiting_confirmation', 'archived'].includes(tab)) {
@@ -57,21 +56,21 @@ export default function DashboardPage() {
     return id
   }
 
-  const greeting = displayName ? `${displayName}'s Orders` : 'My Orders'
+  const greeting = displayName ? `${displayName}'s Directives` : 'My Directives'
 
   return (
     <section className="dashboard-page">
       <div className="page-banner page-banner-lead">
         <div className="banner-content">
           <h1 className="banner-title">{greeting}</h1>
-          <p className="banner-sub">Lead dashboard — create orders, assign operators, review completions</p>
+          <p className="banner-sub">Command view — issue directives, assign team members, confirm done</p>
         </div>
         <button
           type="button"
           className="btn btn-primary"
           onClick={() => setCreateOpen(true)}
         >
-          + New Order
+          + New Directive
         </button>
       </div>
 
@@ -94,25 +93,24 @@ export default function DashboardPage() {
         ))}
       </div>
 
-      {/* Onboarding tip — shown only when Lead has zero orders ever */}
       {!loading && allChecklists.length === 0 && (
         <div className="onboarding-tip">
-          <span className="onboarding-tip-icon">👋</span>
+          <span className="onboarding-tip-icon">→</span>
           <div>
-            <strong>Welcome to MyTOC</strong>
-            <p>You're the Lead — create your first order, add tasks, then assign operators to execute.</p>
+            <strong>Your command view</strong>
+            <p>Issue a Directive in seconds — add items, assign a team member, and confirm when it&apos;s done.</p>
           </div>
           <button type="button" className="btn btn-primary" onClick={() => setCreateOpen(true)}>
-            Create your first order →
+            Create your first directive →
           </button>
         </div>
       )}
 
       {loading ? (
-        <p className="muted-text">Loading orders…</p>
+        <p className="muted-text">Loading directives…</p>
       ) : checklists.length === 0 && allChecklists.length > 0 ? (
         <div className="empty-state">
-          <p className="muted-text">Nothing in this category.</p>
+          <p className="muted-text">Nothing in this status.</p>
         </div>
       ) : (
         <div className="checklist-grid">

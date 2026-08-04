@@ -29,24 +29,30 @@ export default function CreateChecklistModal({ open, onClose, onCreate }: Create
   }
 
   return (
-    <Modal title="New Order" open={open} onClose={onClose}>
+    <Modal title="New Directive" open={open} onClose={onClose}>
       <form className="stack-form" onSubmit={handleSubmit}>
-        <FormField id="create-title" label="Order title" value={title} onChange={setTitle} />
+        <FormField
+          id="create-title"
+          label="Directive title"
+          value={title}
+          onChange={setTitle}
+          placeholder="e.g. Final board deck numbers"
+        />
         <label className="form-field" htmlFor="create-description">
-          <span>Description <span className="field-optional">(optional)</span></span>
+          <span>Brief <span className="field-optional">(optional)</span></span>
           <textarea
             id="create-description"
             value={description}
             onChange={(event) => setDescription(event.target.value)}
             rows={3}
-            placeholder="What needs to be done…"
+            placeholder="What needs to happen…"
           />
         </label>
         <p className="muted-text small-text">
-          You can assign Crew and add tasks after creating the order.
+          Assign a team member and add items after you create the directive.
         </p>
         <button type="submit" className="btn btn-primary" disabled={loading}>
-          {loading ? 'Creating…' : '✓ Create Order'}
+          {loading ? 'Creating…' : '✓ Create Directive'}
         </button>
       </form>
     </Modal>

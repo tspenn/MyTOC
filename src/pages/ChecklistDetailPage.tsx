@@ -10,8 +10,8 @@ import { useChecklistDetailStore } from '../stores/checklistDetailStore'
 
 const STATUS_LABELS: Record<string, string> = {
   active:                'Active',
-  awaiting_confirmation: 'Awaiting Review',
-  archived:              'Archived',
+  awaiting_confirmation: 'Awaiting Confirm',
+  archived:              'Confirmed',
 }
 
 export default function ChecklistDetailPage() {
@@ -96,12 +96,12 @@ export default function ChecklistDetailPage() {
   }
 
   const backLink  = isCrew ? '/my-cards' : '/dashboard'
-  const backLabel = isCrew ? '← My Jobs' : '← Orders'
+  const backLabel = isCrew ? '← My Directives' : '← Command view'
 
-  if (!id) return <p className="muted-text">Order not found.</p>
+  if (!id) return <p className="muted-text">Directive not found.</p>
   if (loading) return (
     <div className="detail-loading">
-      <p className="muted-text">Loading order…</p>
+      <p className="muted-text">Loading directive…</p>
     </div>
   )
 
@@ -109,13 +109,13 @@ export default function ChecklistDetailPage() {
     return (
       <section className="access-denied">
         <h1>Access Denied</h1>
-        <p>You do not have permission to view this order.</p>
+        <p>You do not have permission to view this directive.</p>
         <Link to={backLink} className="btn btn-primary">{backLabel}</Link>
       </section>
     )
   }
 
-  if (!checklist) return <p className="muted-text">Order not found.</p>
+  if (!checklist) return <p className="muted-text">Directive not found.</p>
 
   return (
     <section className="checklist-detail-page">
@@ -123,7 +123,7 @@ export default function ChecklistDetailPage() {
         <div className="detail-header-left">
           <Link to={backLink} className="detail-back-link">{backLabel}</Link>
           <div className="detail-title-block">
-            <span className="detail-order-label">New Order:</span>
+            <span className="detail-order-label">Directive:</span>
             <h1 className="detail-title">{checklist.title}</h1>
           </div>
           <span className={`status-pill status-pill-${checklist.status}`}>
@@ -132,16 +132,14 @@ export default function ChecklistDetailPage() {
         </div>
 
         <div className="detail-header-actions">
-          {/* Mobile objectives toggle */}
           <button
             type="button"
             className="btn btn-secondary btn-sm mobile-only"
             onClick={() => setSidebarOpen(true)}
           >
-            📋 Tasks
+            Items
           </button>
 
-          {/* Crew: mark complete */}
           {isCardAssignee && checklist.status === 'active' && (
             <button
               type="button"
@@ -149,30 +147,28 @@ export default function ChecklistDetailPage() {
               disabled={completing}
               onClick={() => void handleMarkComplete()}
             >
-              {completing ? 'Submitting…' : '✓ Mark Complete'}
+              {completing ? 'Submitting…' : '✓ Mark Done'}
             </button>
           )}
 
-          {/* Lead: share/settings */}
           {isOwner && (
             <button type="button" className="btn btn-secondary btn-sm" onClick={() => setShareOpen(true)}>
-              👥 Assign Crew
+              Assign
             </button>
           )}
           {canEdit && (
             <button type="button" className="btn btn-secondary btn-sm" onClick={() => setSettingsOpen(true)}>
-              📋 Details
+              Details
             </button>
           )}
 
-          {/* Prev / Next navigation */}
           <div className="detail-nav-arrows">
             {previousId
-              ? <Link to={`/checklist/${previousId}`} className="btn btn-secondary btn-sm" title="Previous order">←</Link>
+              ? <Link to={`/checklist/${previousId}`} className="btn btn-secondary btn-sm" title="Previous directive">←</Link>
               : <button type="button" className="btn btn-secondary btn-sm" disabled>←</button>
             }
             {nextId
-              ? <Link to={`/checklist/${nextId}`} className="btn btn-secondary btn-sm" title="Next order">→</Link>
+              ? <Link to={`/checklist/${nextId}`} className="btn btn-secondary btn-sm" title="Next directive">→</Link>
               : <button type="button" className="btn btn-secondary btn-sm" disabled>→</button>
             }
           </div>

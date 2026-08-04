@@ -220,7 +220,7 @@ export default function ProfilePage() {
           </div>
           <div>
             <dt>Role</dt>
-            <dd>{userRole === 'assigner' ? 'Lead (Project Manager)' : userRole === 'assignee' ? 'Assignee (Subcontractor)' : '—'}</dd>
+            <dd>{userRole === 'assigner' ? 'Lead' : userRole === 'assignee' ? 'Team Member' : '—'}</dd>
           </div>
         </dl>
       </div>
@@ -229,7 +229,7 @@ export default function ProfilePage() {
         <div className="profile-section">
           <h2>Availability</h2>
           <p className="muted-text">
-            Let your subcontractors know when you are taking new work. Your status shows in the header as{' '}
+            Let your team members know when you are taking new directives. Your status shows in the header as{' '}
             <strong>Lead · Available</strong> or <strong>Lead · Unavailable</strong>.
           </p>
           {availabilityError && <Alert variant="error" message={availabilityError} />}
@@ -238,8 +238,8 @@ export default function ProfilePage() {
               <p className="profile-notify-title">{leadAvailable ? 'Available' : 'Unavailable'}</p>
               <p className="muted-text small-text">
                 {leadAvailable
-                  ? 'You are open for new orders and assignments.'
-                  : 'You are not taking new work right now.'}
+                  ? 'You are open for new directives and assignments.'
+                  : 'You are not taking new directives right now.'}
               </p>
             </div>
             <button
@@ -257,7 +257,7 @@ export default function ProfilePage() {
       <div className="profile-section">
         <h2>Notifications</h2>
         <p className="muted-text">
-          Get a Ping when you are assigned to an order. Must have notifications turned on on your device/s.
+          Get a Ping when you are assigned to a directive. Must have notifications turned on on your device/s.
           Install MyTOC (or allow notifications in the browser) on each phone or computer you want pinged.
         </p>
         {pushError && <Alert variant="error" message={pushError} />}
@@ -266,7 +266,7 @@ export default function ProfilePage() {
             <p className="profile-notify-title">{pushEnabled ? 'Notifications on' : 'Notifications off'}</p>
             <p className="muted-text small-text">
               {userRole === 'assignee'
-                ? 'Assignees: turn this on so your Lead can reach you when work is assigned.'
+                ? 'Team Members: turn this on so your Lead can reach you when a directive is assigned.'
                 : 'Optional on Lead accounts — turn on if you also receive assignments.'}
             </p>
           </div>
@@ -288,7 +288,7 @@ export default function ProfilePage() {
 
       <div className="profile-section">
         <h2>Display name</h2>
-        <p className="muted-text">This name appears on messages and cards.</p>
+        <p className="muted-text">This name appears on messages and directives.</p>
         <form className="profile-form" onSubmit={handleNameSave}>
           {nameError   && <Alert variant="error"   message={nameError}   />}
           {nameSuccess && <Alert variant="success" message={nameSuccess} />}

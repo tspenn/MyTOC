@@ -18,8 +18,8 @@ self.addEventListener('push', (event) => {
     self.registration.showNotification(payload.title || 'MyTOC', {
       body: payload.body || '',
       data: { url: payload.url || '/' },
-      icon: '/icon-192.png',
-      badge: '/icon-192.png',
+      icon: '/favicon.jpg',
+      badge: '/favicon.jpg',
     }),
   )
 })

@@ -60,7 +60,7 @@ export default function LoginPage() {
   return (
     <AuthLayout
       title="Welcome back"
-      subtitle="Sign in to manage your shared checklists."
+      subtitle="Sign in to your command center."
       footerText="Don't have an account?"
       footerLinkText="Sign up"
       footerLinkTo="/signup"

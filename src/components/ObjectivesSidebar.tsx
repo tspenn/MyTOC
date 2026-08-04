@@ -153,7 +153,7 @@ export default function ObjectivesSidebar({
   return (
     <aside className={clsx('objectives-sidebar', mobileOpen && 'objectives-sidebar-open')}>
       <div className="sidebar-header">
-        <h2>Objectives</h2>
+        <h2>Items</h2>
         <button type="button" className="btn btn-secondary btn-sm mobile-only" onClick={onCloseMobile}>
           ✕ Close
         </button>
@@ -167,15 +167,15 @@ export default function ObjectivesSidebar({
           </div>
           <p className="objectives-order-hint">
             {canEdit
-              ? 'Lead can reorder anytime — the Current task stays locked. Crew works top to bottom.'
-              : 'Work in order — open a task to mark it Current. Check finished to unlock the next.'}
+              ? 'Lead can reorder anytime — the Current item stays locked. Team Members work top to bottom.'
+              : 'Work in sequence — open an item to mark it Current. Mark done to unlock the next.'}
           </p>
         </>
       )}
 
       <div className="objectives-list">
         {ordered.length === 0 ? (
-          <p className="muted-text">No tasks yet. Add your first objective below.</p>
+          <p className="muted-text">No items yet. Add your first item below.</p>
         ) : (
           ordered.map((item, index) => {
             const isExpanded = expandedId === item.id
@@ -213,7 +213,7 @@ export default function ObjectivesSidebar({
                     ) : (
                       <span
                         className="drag-handle drag-handle-locked"
-                        title={isCurrent ? 'Current task is locked' : 'Done tasks stay in place'}
+                        title={isCurrent ? 'Current item is locked' : 'Done items stay in place'}
                         aria-hidden="true"
                       >
                         ⠿
@@ -230,9 +230,9 @@ export default function ObjectivesSidebar({
                       disabled={!toggleAllowed}
                       title={
                         lockedAhead
-                          ? 'Finish the previous task first'
+                          ? 'Finish the previous item first'
                           : item.completed && !toggleAllowed
-                            ? 'Uncheck the latest finished task first'
+                            ? 'Uncheck the latest finished item first'
                             : undefined
                       }
                       onChange={(event) => handleToggle(item.id, event.target.checked)}
@@ -243,9 +243,9 @@ export default function ObjectivesSidebar({
                     type="button"
                     className="objective-open-btn"
                     onClick={() => handleOpenCard(item)}
-                    title={isExpanded ? 'Collapse task' : 'Open task card'}
+                    title={isExpanded ? 'Collapse item' : 'Open item'}
                   >
-                    <span className="objective-task-preview">{item.task || 'Untitled task'}</span>
+                    <span className="objective-task-preview">{item.task || 'Untitled item'}</span>
                     {isCurrent && <span className="current-pill">Current</span>}
                     <span className="objective-chevron" aria-hidden="true">{isExpanded ? '▾' : '▸'}</span>
                   </button>
@@ -267,7 +267,7 @@ export default function ObjectivesSidebar({
                       <button
                         type="button"
                         className="btn btn-secondary btn-sm"
-                        title="Delete task"
+                        title="Delete item"
                         onClick={() => onDelete(item.id)}
                       >
                         ✕
@@ -281,7 +281,7 @@ export default function ObjectivesSidebar({
                     {canEditDetails ? (
                       <>
                         <p className="objective-card-hint">
-                          Edit task details before the crew marks this done. Attach files here if needed.
+                          Edit item details before team members mark this done. Attach files here if needed.
                         </p>
                         <TaskInput
                           task={item.task}
@@ -295,15 +295,15 @@ export default function ObjectivesSidebar({
                         <p className="objective-card-body">{item.task}</p>
                         {item.completed ? (
                           <p className="objective-card-locked">
-                            Done — task details are locked. Discuss changes in Messages.
+                            Done — item details are locked. Discuss changes in Messages.
                           </p>
                         ) : lockedAhead ? (
                           <p className="objective-card-locked">
-                            Locked until earlier tasks are checked finished.
+                            Locked until earlier items are marked done.
                           </p>
                         ) : (
                           <p className="objective-card-locked">
-                            Only the Lead can edit task details. Use Messages for questions or updates.
+                            Only the Lead can edit item details. Use Messages for questions or updates.
                           </p>
                         )}
                       </>
@@ -334,7 +334,7 @@ export default function ObjectivesSidebar({
         <form className="add-item-form" onSubmit={handleAdd}>
           <input
             type="text"
-            placeholder="Add new task…"
+            placeholder="Add new item…"
             value={newTask}
             onChange={(event) => setNewTask(event.target.value)}
           />

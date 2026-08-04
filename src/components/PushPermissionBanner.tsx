@@ -15,7 +15,7 @@ export default function PushPermissionBanner() {
       <span className="push-banner-icon">🔔</span>
       <div className="push-banner-text">
         <strong>Get notified instantly</strong>
-        <span>Allow notifications so you'll know the moment a new order is assigned to you.</span>
+        <span>Allow notifications so you know the moment a directive is assigned to you.</span>
       </div>
       <button
         type="button"

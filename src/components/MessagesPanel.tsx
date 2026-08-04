@@ -103,7 +103,7 @@ export default function MessagesPanel({
             onChange={(e) => setSelectedItemId(e.target.value)}
             required
           >
-            <option value="">Task…</option>
+            <option value="">Item…</option>
             {items.map((item) => (
               <option key={item.id} value={item.id}>
                 {item.task.length > 40 ? item.task.slice(0, 38) + '…' : item.task}

@@ -130,7 +130,7 @@ export const useChecklistDetailStore = create<ChecklistDetailState>((set, get) =
         return
       }
       set({
-        error: error instanceof Error ? error.message : 'Failed to load checklist',
+        error: error instanceof Error ? error.message : 'Failed to load directive',
         loading: false,
       })
     }
@@ -322,7 +322,7 @@ export const useChecklistDetailStore = create<ChecklistDetailState>((set, get) =
       await deleteChecklist(checklist.id)
       return true
     } catch (error) {
-      set({ error: error instanceof Error ? error.message : 'Failed to delete checklist' })
+      set({ error: error instanceof Error ? error.message : 'Failed to delete directive' })
       return false
     }
   },

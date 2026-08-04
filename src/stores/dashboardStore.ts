@@ -45,7 +45,7 @@ export const useDashboardStore = create<DashboardState>((set, get) => ({
           ? 'Access Denied'
           : error instanceof Error
             ? error.message
-            : 'Failed to load checklists'
+            : 'Failed to load directives'
       set({ error: message, loading: false })
     }
   },
@@ -92,7 +92,7 @@ export const useDashboardStore = create<DashboardState>((set, get) => ({
       await get().loadChecklists(userId)
       return checklist.id
     } catch (error) {
-      set({ error: error instanceof Error ? error.message : 'Failed to create checklist' })
+      set({ error: error instanceof Error ? error.message : 'Failed to create directive' })
       return null
     }
   },
@@ -105,7 +105,7 @@ export const useDashboardStore = create<DashboardState>((set, get) => ({
         checklists: state.checklists.filter((c) => c.id !== id),
       }))
     } catch (error) {
-      set({ error: error instanceof Error ? error.message : 'Failed to delete checklist' })
+      set({ error: error instanceof Error ? error.message : 'Failed to delete directive' })
     }
   },
 

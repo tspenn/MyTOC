@@ -19,7 +19,7 @@ export default function BottomNav() {
         to={homeHref}
         className={`bottom-nav-tab ${location.pathname === homeHref || location.pathname === '/' ? 'bottom-nav-active' : ''}`}
       >
-        <span className="bottom-nav-brand">TOC</span>
+        <span className="bottom-nav-icon" aria-hidden="true">⌂</span>
         <span>Home</span>
       </Link>
 
@@ -28,7 +28,7 @@ export default function BottomNav() {
         className={`bottom-nav-tab ${isActive(['/my-cards', '/dashboard']) && !isActive(['/checklist']) ? 'bottom-nav-active' : ''}`}
       >
         <span className="bottom-nav-icon">📋</span>
-        <span>{isCrew ? 'My Jobs' : 'Orders'}</span>
+        <span>{isCrew ? 'My Directives' : 'Directives'}</span>
       </Link>
 
       <Link
@@ -36,7 +36,7 @@ export default function BottomNav() {
         className={`bottom-nav-tab ${isActive(['/checklist']) ? 'bottom-nav-active' : ''}`}
       >
         <span className="bottom-nav-icon">✓</span>
-        <span>Previous</span>
+        <span>Confirmed</span>
       </Link>
     </nav>
   )

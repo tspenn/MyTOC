@@ -43,46 +43,47 @@ export default function SettingsModal({
   }
 
   async function handleDelete() {
-    const confirmed = window.confirm('Delete this checklist and all items, comments, and attachments?')
+    const confirmed = window.confirm('Delete this directive and all items, comments, and attachments?')
     if (!confirmed) return
     await onDelete()
   }
 
   return (
-    <Modal title="Order details" open={open} onClose={onClose}>
+    <Modal title="Directive details" open={open} onClose={onClose}>
       {error && <Alert variant="error" message={error} />}
 
       <p className="muted-text" style={{ marginTop: 0 }}>
-        Overview for this order — title, instructions, and links. App help lives in Settings.
+        Overview for this directive — title, instructions, and links. App help lives in Settings.
       </p>
 
       <form className="stack-form" onSubmit={handleSave}>
         <FormField id="settings-title" label="Title" value={title} onChange={setTitle} />
         <label className="form-field" htmlFor="settings-description">
-          <span>Overview / description</span>
+          <span>Brief / instructions</span>
           <textarea
             id="settings-description"
             value={description}
             onChange={(event) => setDescription(event.target.value)}
             rows={4}
+            placeholder="e.g. Confirm vendor shortlist by Friday — attach final list"
           />
         </label>
 
         <div className="button-row">
           <button type="submit" className="btn btn-primary" disabled={saving}>
-            {saving ? 'Saving...' : 'Save changes'}
+            {saving ? 'Saving…' : 'Save changes'}
           </button>
           <button type="button" className="btn btn-secondary" onClick={onManageCollaborators}>
-            Manage collaborators
+            Manage assignment
           </button>
         </div>
       </form>
 
       <div className="danger-zone">
-        <h3>Delete order</h3>
-        <p className="muted-text">This permanently removes the order and all related data.</p>
+        <h3>Delete directive</h3>
+        <p className="muted-text">This permanently removes the directive and all related data.</p>
         <button type="button" className="btn btn-danger" onClick={() => void handleDelete()}>
-          Delete order
+          Delete directive
         </button>
       </div>
     </Modal>

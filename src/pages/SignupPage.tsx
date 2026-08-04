@@ -96,7 +96,7 @@ export default function SignupPage() {
   return (
     <AuthLayout
       title="Join MyTOC"
-      subtitle="Assign work. Track execution. Confirm completion."
+      subtitle="Issue directives. Track ownership. Confirm done."
       footerText="Already have an account?"
       footerLinkText="Sign in"
       footerLinkTo="/login"
@@ -157,7 +157,7 @@ export default function SignupPage() {
             />
             <div>
               <strong>Lead (COO / Executive)</strong>
-              <span>Create orders, assign operators, review &amp; confirm completions</span>
+              <span>Create directives, assign team members, confirm done</span>
             </div>
           </label>
           <label className={`role-option ${role === 'assignee' ? 'role-option-selected' : ''}`}>
@@ -169,8 +169,8 @@ export default function SignupPage() {
               onChange={() => setRole('assignee')}
             />
             <div>
-              <strong>Operator (Assignee)</strong>
-              <span>Receive orders via notifications, check tasks, mark work complete</span>
+              <strong>Team Member</strong>
+              <span>Receive directives via notifications, work items, mark done</span>
             </div>
           </label>
         </fieldset>

@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import { fetchMyRole } from '../lib/checklistApi'
+import { getSupabaseConfig } from '../lib/env'
 import { supabase } from '../lib/supabase'
 import { useAuthStore } from '../stores/authStore'
 
@@ -12,6 +13,19 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
 
   useEffect(() => {
     let mounted = true
+    const config = getSupabaseConfig()
+
+    // Marketing / local preview without keys — don't block the UI.
+    if (!config.ok) {
+      setAuth(null)
+      setUserRole(null)
+      setDisplayName(null)
+      setLeadAvailable(true)
+      setInitialized(true)
+      return () => {
+        mounted = false
+      }
+    }
 
     async function initSession() {
       const { data: { session } } = await supabase.auth.getSession().catch(() => ({ data: { session: null } }))
@@ -41,12 +55,10 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
           setDisplayName(result?.displayName ?? null)
           setLeadAvailable(result?.isAvailable ?? true)
         }
-      } else {
-        if (mounted) {
-          setUserRole(null)
-          setDisplayName(null)
-          setLeadAvailable(true)
-        }
+      } else if (mounted) {
+        setUserRole(null)
+        setDisplayName(null)
+        setLeadAvailable(true)
       }
       setInitialized(true)
     })

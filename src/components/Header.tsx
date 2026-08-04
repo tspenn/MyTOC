@@ -28,14 +28,14 @@ export default function Header() {
               Lead · {leadAvailable ? 'Available' : 'Unavailable'}
             </span>
           ) : (
-            <span className="app-logo-role">Assignee</span>
+            <span className="app-logo-role">Team Member</span>
           )
         )}
       </div>
 
       {/* Center — MyTOC logo */}
       <Link to={isAuthenticated ? homeLink : '/home'} className="app-logo" title="Tactical Operations Center">
-        <span className="app-logo-text">MyTOC</span>
+        <img src="/Logo.jpg" alt="MyTOC" className="app-logo-img" />
       </Link>
 
       {/* Right — nav */}

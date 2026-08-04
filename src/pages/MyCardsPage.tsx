@@ -18,7 +18,7 @@ export default function MyCardsPage() {
       .then((data) => { if (mounted) { setCards(data); setLoading(false) } })
       .catch((err) => {
         if (mounted) {
-          setError(err instanceof Error ? err.message : 'Failed to load jobs')
+          setError(err instanceof Error ? err.message : 'Failed to load directives')
           setLoading(false)
         }
       })
@@ -29,25 +29,27 @@ export default function MyCardsPage() {
   const waiting = cards.filter((c) => c.status === 'awaiting_confirmation')
   const done    = cards.filter((c) => c.status === 'archived')
 
-  const greeting = displayName ? `${displayName}'s Jobs` : 'My Jobs'
+  const greeting = displayName ? `${displayName}'s Directives` : 'My Directives'
 
   return (
     <section className="dashboard-page">
       <div className="page-banner page-banner-crew">
         <div className="banner-content">
           <h1 className="banner-title">{greeting}</h1>
-          <p className="banner-sub">Your assigned orders — check tasks, post updates, mark complete</p>
+          <p className="banner-sub">Assigned to you — work items, update status, mark done</p>
         </div>
       </div>
 
       {error && <Alert variant="error" message={error} />}
 
       {loading ? (
-        <p className="muted-text">Loading your jobs…</p>
+        <p className="muted-text">Loading your directives…</p>
       ) : cards.length === 0 ? (
         <div className="empty-state">
-          <p className="muted-text">No jobs assigned to you yet.</p>
-          <p className="muted-text small-text">Your Lead will assign orders and notify you — turn on notifications in Profile (must have notifications enabled on your device/s).</p>
+          <p className="muted-text">No directives assigned to you yet.</p>
+          <p className="muted-text small-text">
+            Your Lead will assign a directive and notify you — turn on notifications in Profile.
+          </p>
         </div>
       ) : (
         <>
@@ -63,7 +65,7 @@ export default function MyCardsPage() {
           )}
           {waiting.length > 0 && (
             <div className="card-group">
-              <h2 className="card-group-title">🟡 Awaiting Review</h2>
+              <h2 className="card-group-title">🟡 Awaiting Confirm</h2>
               <div className="checklist-grid">
                 {waiting.map((card) => (
                   <ChecklistCard key={card.id} checklist={card} showStatus />
@@ -73,7 +75,7 @@ export default function MyCardsPage() {
           )}
           {done.length > 0 && (
             <div className="card-group">
-              <h2 className="card-group-title">📁 Completed</h2>
+              <h2 className="card-group-title">📁 Confirmed</h2>
               <div className="checklist-grid">
                 {done.map((card) => (
                   <ChecklistCard key={card.id} checklist={card} showStatus />

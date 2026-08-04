@@ -14,7 +14,7 @@ interface ShareModalProps {
 }
 
 const ROLE_LABELS: Record<CollaboratorRole, string> = {
-  assignee: 'Crew — checks tasks, marks complete, posts messages',
+  assignee: 'Team Member — owns items, marks done, posts updates',
   editor:   'Co-Lead — full edit access',
   viewer:   'Viewer — read-only',
 }
@@ -41,13 +41,13 @@ export default function ShareModal({
   }
 
   return (
-    <Modal title="Assign Crew" open={open} onClose={onClose}>
+    <Modal title="Assign" open={open} onClose={onClose}>
       {error && <Alert variant="error" message={error} />}
 
       <form className="stack-form" onSubmit={handleInvite}>
         <FormField
           id="invite-email"
-          label="Crew member email"
+          label="Team Member email"
           type="email"
           value={email}
           onChange={setEmail}
@@ -66,14 +66,14 @@ export default function ShareModal({
           </select>
         </label>
         <button type="submit" className="btn btn-primary" disabled={submitting}>
-          {submitting ? 'Sending…' : '📨 Assign & Notify'}
+          {submitting ? 'Sending…' : 'Assign & notify'}
         </button>
       </form>
 
       <div className="collaborator-list">
-        <h3>Assigned Crew</h3>
+        <h3>Assigned team members</h3>
         {collaborators.length === 0 ? (
-          <p className="muted-text">No crew assigned yet.</p>
+          <p className="muted-text">No team members assigned yet.</p>
         ) : (
           <ul>
             {collaborators.map((c) => (
@@ -81,7 +81,7 @@ export default function ShareModal({
                 <div>
                   <strong>{c.email ?? `User …${c.user_id.slice(-6)}`}</strong>
                   <span className={`role-pill role-pill-${c.role}`}>
-                    {c.role === 'assignee' ? 'Crew' : c.role === 'editor' ? 'Co-Lead' : 'Viewer'}
+                    {c.role === 'assignee' ? 'Team Member' : c.role === 'editor' ? 'Co-Lead' : 'Viewer'}
                   </span>
                 </div>
                 <button

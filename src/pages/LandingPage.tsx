@@ -2,22 +2,21 @@ import { Link } from 'react-router-dom'
 
 const STARTER_FEATURES = [
   '1 Lead account',
-  '1 Operator',
-  'Unlimited initiatives',
-  'Task checklists',
-  'Real-time updates',
+  'Up to 5 Team Members',
+  'Unlimited Directives',
+  'Real-time status & confirmation',
+  'Clean audit trail',
   'Push notifications',
-  'Confirm / reject completions',
+  'Mobile-first PWA',
 ]
 
 const TEAM_FEATURES = [
   '3 Lead accounts',
-  '15 Operators',
-  'Unlimited initiatives',
-  'Task checklists',
-  'Real-time updates',
+  'Up to 25 Team Members',
+  'Unlimited Directives',
+  'Real-time status & confirmation',
+  'Clean audit trail',
   'Push notifications',
-  'Confirm / reject completions',
   'Priority support',
 ]
 
@@ -27,7 +26,14 @@ export default function LandingPage() {
 
       {/* ── Hero ───────────────────────────────────────── */}
       <section className="landing-hero">
+        <img
+          className="hero-media"
+          src="/toc-window.png"
+          alt="View of Earth through a tactical operations viewport"
+        />
+        <div className="hero-scrim" aria-hidden="true" />
         <div className="hero-content">
+          <p className="hero-brand-text">MyTOC</p>
           <div className="hero-badge">Executive Command Platform</div>
           <h1 className="hero-title">
             Complete Operational<br />
@@ -40,33 +46,30 @@ export default function LandingPage() {
             <Link to="/signup" className="btn btn-gold btn-lg">
               Launch Your TOC
             </Link>
-            <a href="#pricing" className="btn btn-outline btn-lg">
-              See Pricing
-            </a>
           </div>
         </div>
       </section>
 
       {/* ── How it works ───────────────────────────────── */}
       <section className="landing-section">
-        <h2 className="section-title">How it works</h2>
+        <h2 className="section-title">Open. Assign. Track. Confirm.</h2>
         <div className="how-it-works">
           <div className="how-step">
             <span className="how-number">1</span>
-            <h3>Lead creates an order</h3>
-            <p>Add tasks, attach files, set due dates. One clear card per initiative.</p>
+            <h3>Issue a Directive</h3>
+            <p>Name it, add items, attach what matters. Seconds — not a project plan.</p>
           </div>
           <div className="how-divider">→</div>
           <div className="how-step">
             <span className="how-number">2</span>
-            <h3>Operators get notified</h3>
-            <p>Assignees get a push notification (notifications must be on). They open MyTOC and see exactly what is needed.</p>
+            <h3>Assign ownership</h3>
+            <p>Your team member gets a push (notifications on). They open MyTOC and see exactly what&apos;s needed.</p>
           </div>
           <div className="how-divider">→</div>
           <div className="how-step">
             <span className="how-number">3</span>
-            <h3>Lead confirms</h3>
-            <p>Operators mark the order complete. Lead reviews and confirms — or sends it back.</p>
+            <h3>Confirm done</h3>
+            <p>Team Member marks done. You confirm — or send it back. Clear ownership. Instant status.</p>
           </div>
         </div>
       </section>
@@ -88,7 +91,7 @@ export default function LandingPage() {
                 Supabase
               </a>
               {' '}— the industry gold standard for secure, open-source database infrastructure.
-              Your orders, tasks, and messages are encrypted at rest and in transit, protected
+              Your directives, items, and messages are encrypted at rest and in transit, protected
               by row-level security policies so only authorized users can ever see your data.
               We never sell your information, and you can delete your account at any time.
             </p>
@@ -105,24 +108,26 @@ export default function LandingPage() {
 
       {/* ── Pricing ────────────────────────────────────── */}
       <section className="landing-section landing-pricing" id="pricing">
-        <h2 className="section-title">Simple pricing</h2>
+        <h2 className="section-title">Simple, transparent pricing</h2>
         <p className="section-sub">No hidden fees. Cancel any time.</p>
 
         <div className="pricing-grid">
 
           <div className="pricing-card">
             <div className="pricing-card-header">
-              <span className="pricing-tier-label">Solopreneur</span>
+              <span className="pricing-tier-label">Solo Command</span>
               <div className="pricing-amount">
                 <span className="pricing-dollar">$</span>
-                <span className="pricing-number">3.99</span>
-                <span className="pricing-period">/mo</span>
+                <span className="pricing-number">19</span>
+                <span className="pricing-period">/ month</span>
               </div>
               <div className="pricing-annual-note">
-                or <strong>$39.90/year</strong>
+                or <strong>$190 / year</strong>
                 <span className="pricing-savings-pill">2 months free</span>
               </div>
-              <p className="pricing-desc">Perfect for a solo lead and one operator.</p>
+              <p className="pricing-desc">
+                Built for the individual COO or executive who needs a personal command layer for their closest team members.
+              </p>
             </div>
 
             <ul className="pricing-features">
@@ -135,7 +140,7 @@ export default function LandingPage() {
             </ul>
 
             <Link to="/signup" className="btn btn-primary btn-full pricing-cta">
-              Start Solopreneur
+              Start Solo Command
             </Link>
           </div>
 
@@ -143,17 +148,19 @@ export default function LandingPage() {
             <div className="pricing-featured-badge">Best Value</div>
 
             <div className="pricing-card-header">
-              <span className="pricing-tier-label">Team</span>
+              <span className="pricing-tier-label">Team Command</span>
               <div className="pricing-amount">
                 <span className="pricing-dollar">$</span>
-                <span className="pricing-number">14.99</span>
-                <span className="pricing-period">/mo</span>
+                <span className="pricing-number">49</span>
+                <span className="pricing-period">/ month</span>
               </div>
               <div className="pricing-annual-note">
-                or <strong>$149.90/year</strong>
+                or <strong>$490 / year</strong>
                 <span className="pricing-savings-pill">2 months free</span>
               </div>
-              <p className="pricing-desc">Built for executive ops — COOs, chiefs of staff, and cross-functional leads.</p>
+              <p className="pricing-desc">
+                Built for executive ops — COOs, chiefs of staff, and small cross-functional leadership groups.
+              </p>
             </div>
 
             <ul className="pricing-features">
@@ -166,7 +173,7 @@ export default function LandingPage() {
             </ul>
 
             <Link to="/signup" className="btn btn-gold btn-full pricing-cta">
-              Start with Team
+              Start Team Command
             </Link>
           </div>
         </div>
@@ -179,9 +186,10 @@ export default function LandingPage() {
       {/* ── Footer ─────────────────────────────────────── */}
       <footer className="landing-footer">
         <div className="footer-brand">
+          <img src="/Logo.jpg" alt="MyTOC" className="footer-logo-img" />
           <span className="footer-logo">Tactical Operations Center</span>
         </div>
-        <p className="footer-copy">© {new Date().getFullYear()} MyTOC.com. Built for COOs and C-Suite operators.</p>
+        <p className="footer-copy">MyTOC.app © {new Date().getFullYear()} Skyland Publishing for Skyland Reach LLC</p>
         <nav className="footer-nav">
           <Link to="/login">Log in</Link>
           <Link to="/signup">Sign up</Link>
