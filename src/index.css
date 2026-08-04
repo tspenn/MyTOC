@@ -2125,3 +2125,202 @@ a:hover { text-decoration: underline; color: var(--violet); }
 .reset-sent-icon { font-size: 2.5rem; }
 .reset-sent p    { color: #5a4a35; line-height: 1.5; max-width: 28ch; margin: 0; }
 
+/* ─── Team roster (Settings → Team) ───────────────────────────────────────── */
+.team-panel { display: flex; flex-direction: column; gap: 1.5rem; }
+.team-lead-id-block {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: #fff;
+}
+.team-lead-id-block h2 { margin: 0 0 0.35rem; font-size: 1.1rem; }
+.team-lead-id-row { display: flex; align-items: center; gap: 0.75rem; }
+.team-lead-id {
+  font-family: ui-monospace, monospace;
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--blue);
+}
+.team-add-form h2,
+.team-roster h2 { margin: 0 0 0.35rem; font-size: 1.1rem; }
+.team-add-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+}
+.team-add-row .form-field { flex: 1; min-width: 12rem; margin: 0; }
+.team-roster-list {
+  list-style: none;
+  margin: 0.75rem 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+.team-roster-item {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: #fff;
+}
+.team-roster-info { display: flex; flex-direction: column; gap: 0.25rem; }
+.team-status { font-size: 0.8rem; color: var(--muted); }
+.team-status-active { color: #16a34a; font-weight: 600; }
+.team-roster-actions { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.team-roster-actions a.btn {
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+}
+.team-signup-welcome { margin: 0 0 0.5rem; color: var(--muted); }
+
+.share-intro { margin: 0 0 0.75rem; }
+.share-add-row {
+  margin-bottom: 1.25rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border);
+}
+.share-roster h3 {
+  margin: 0 0 0.5rem;
+  font-size: 1rem;
+}
+.share-roster-list {
+  list-style: none;
+  margin: 0 0 1rem;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+.share-roster-item {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.65rem;
+  padding: 0.75rem 0.85rem;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: #fff;
+}
+.share-roster-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  min-width: 12rem;
+}
+.share-roster-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+.share-roster-actions a.btn {
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+}
+
+/* ─── Co-Leads + Lead notes ─────────────────────────────────────────────────── */
+.co-leads-panel { display: flex; flex-direction: column; gap: 1rem; }
+.co-leads-list,
+.co-leads-pending-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.co-leads-item,
+.co-leads-pending-item {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.65rem 0.85rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: #fff;
+}
+.co-leads-badge {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #7a3c10;
+  background: #fde8c8;
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+}
+.co-leads-invite-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+.co-leads-invite-row .form-field { flex: 1; min-width: 12rem; margin: 0; }
+.join-lead-actions { display: flex; flex-direction: column; gap: 0.75rem; }
+
+.lead-notes-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1rem;
+  border: 1px dashed var(--border);
+  border-radius: 10px;
+  background: #fff;
+}
+.lead-notes-header h2 { margin: 0 0 0.25rem; font-size: 1.05rem; }
+.lead-notes-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+.lead-note-item {
+  padding: 0.65rem 0.75rem;
+  border-radius: 8px;
+  background: var(--cream);
+  border: 1px solid var(--border);
+}
+.lead-note-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.5rem;
+  margin-bottom: 0.35rem;
+}
+.lead-note-date { font-size: 0.75rem; color: var(--muted); }
+.lead-note-text { margin: 0; color: var(--ink); line-height: 1.45; white-space: pre-wrap; }
+.lead-notes-compose {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.lead-notes-input {
+  font: inherit;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.6rem 0.75rem;
+  resize: vertical;
+}
+
+.detail-layout .lead-notes-panel {
+  grid-column: 1 / -1;
+}
+

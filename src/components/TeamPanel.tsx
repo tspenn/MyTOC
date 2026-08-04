@@ -5,7 +5,13 @@ import CoLeadsPanel from './CoLeadsPanel'
 import { createTeamSlot, ensureLeadCode, fetchTeamSlots } from '../lib/checklistApi'
 import { useAuth } from '../hooks/useAuth'
 import type { TeamSlot } from '../lib/types'
-import { copyToClipboard, formatTeamMemberLabel, teamInviteSms, teamSignupUrl } from '../lib/teamAuth'
+import {
+  copyToClipboard,
+  formatTeamMemberLabel,
+  teamInviteMailto,
+  teamInviteSms,
+  teamSignupUrl,
+} from '../lib/teamAuth'
 
 export default function TeamPanel() {
   const { isPrimaryLead } = useAuth()
@@ -91,7 +97,9 @@ export default function TeamPanel() {
 
       <form className="team-add-form" onSubmit={handleAdd}>
         <h2>Add team member</h2>
-        <p className="muted-text">Creates a worker # — then copy the link or text message to send from your phone.</p>
+        <p className="muted-text">
+          Creates a worker # — then copy the link, open Email invite, or copy a message to send yourself.
+        </p>
         <div className="team-add-row">
           <FormField
             id="team-member-name"
@@ -118,6 +126,9 @@ export default function TeamPanel() {
               const smsKey = `sms-${slot.id}`
               const link = leadCode ? teamSignupUrl(leadCode, slot.worker_number) : ''
               const sms = leadCode ? teamInviteSms(leadCode, slot.worker_number, slot.display_name) : ''
+              const mailto = leadCode
+                ? teamInviteMailto(leadCode, slot.worker_number, slot.display_name)
+                : ''
               return (
                 <li key={slot.id} className="team-roster-item">
                   <div className="team-roster-info">
@@ -135,12 +146,15 @@ export default function TeamPanel() {
                       >
                         {copied === linkKey ? 'Link copied!' : 'Copy link'}
                       </button>
+                      <a className="btn btn-secondary btn-sm" href={mailto}>
+                        Email invite
+                      </a>
                       <button
                         type="button"
                         className="btn btn-secondary btn-sm"
                         onClick={() => void handleCopy(smsKey, sms)}
                       >
-                        {copied === smsKey ? 'Message copied!' : 'Copy text message'}
+                        {copied === smsKey ? 'Message copied!' : 'Copy message'}
                       </button>
                     </div>
                   )}

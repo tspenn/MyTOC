@@ -31,6 +31,13 @@ export function teamInviteSms(leadCode: string, workerNumber: string, memberName
   ].join('\n')
 }
 
+/** Opens the Lead's own email app with invite pre-filled (not app-sent email). */
+export function teamInviteMailto(leadCode: string, workerNumber: string, memberName: string): string {
+  const subject = encodeURIComponent(`Join my MyTOC team — ${memberName}`)
+  const body = encodeURIComponent(teamInviteSms(leadCode, workerNumber, memberName))
+  return `mailto:?subject=${subject}&body=${body}`
+}
+
 export function coLeadInviteUrl(token: string): string {
   const base = typeof window !== 'undefined' ? window.location.origin : 'https://mytoc-eta.vercel.app'
   return `${base}/join-lead?token=${encodeURIComponent(token.trim())}`
