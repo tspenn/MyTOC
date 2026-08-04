@@ -2,7 +2,7 @@
 
 Operations command center for COOs and C-Suite leaders. Built with Vite, React, TypeScript, and Supabase.
 
-**Site:** [MyTOC.com](https://MyTOC.com)
+**Site:** [mytoc-eta.vercel.app](https://mytoc-eta.vercel.app) (custom domain MyTOC.app later)
 
 ## Setup
 

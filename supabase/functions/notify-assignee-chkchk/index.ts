@@ -90,7 +90,7 @@ Deno.serve(async (req) => {
       )
     }
 
-    const appUrl   = (Deno.env.get('CHKCHK_APP_URL') || 'https://chk-chk.vercel.app').replace(/\/$/, '')
+    const appUrl   = (Deno.env.get('CHKCHK_APP_URL') || Deno.env.get('MYTOC_APP_URL') || 'https://mytoc-eta.vercel.app').replace(/\/$/, '')
     const deepLink = `${appUrl}/checklist/${checklist_id}`
     const payload  = JSON.stringify({
       title: '📋 New order assigned',
