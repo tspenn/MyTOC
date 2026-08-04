@@ -1,11 +1,12 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
+import TeamPanel from '../components/TeamPanel'
 import { useAuth } from '../hooks/useAuth'
 
-type SettingsTab = 'howto' | 'upgrade'
+type SettingsTab = 'howto' | 'team' | 'upgrade'
 
 export default function SettingsPage() {
-  const { isCrew } = useAuth()
+  const { isTeamMember, isLead } = useAuth()
   const [tab, setTab] = useState<SettingsTab>('howto')
 
   return (
@@ -36,6 +37,17 @@ export default function SettingsPage() {
         >
           How to use
         </button>
+        {isLead && (
+          <button
+            type="button"
+            role="tab"
+            aria-selected={tab === 'team'}
+            className={tab === 'team' ? 'settings-tab settings-tab-active' : 'settings-tab'}
+            onClick={() => setTab('team')}
+          >
+            Team
+          </button>
+        )}
         <button
           type="button"
           role="tab"
@@ -85,17 +97,18 @@ export default function SettingsPage() {
                 <li>Add items under <strong>Items</strong> in the order team members should work them.</li>
                 <li>Drag the ⠿ handle to reorder anytime — the <strong>Current</strong> item cannot be moved.</li>
                 <li>Open an item to edit details or attach files <em>before</em> it is marked done.</li>
-                <li>Use <strong>Assign</strong> to invite a team member (they need a MyTOC account).</li>
+                <li>Use <strong>Assign</strong> to add a team member (Lead ID invite from Settings → Team, or email).</li>
                 <li>Set your <strong>Availability</strong> in Profile so team members know when you are taking directives.</li>
                 <li>After an item is marked done, change requests go through <strong>Messages</strong>.</li>
-                <li>When team members mark the directive done, review and confirm (or send it back).</li>
+                <li>When a Team Member marks the directive done, review and confirm (or send it back).</li>
               </ol>
             </article>
 
             <article className="howto-card">
               <h2>For Team Members</h2>
               <ol>
-                <li>Sign up as a team member, then turn on <strong>Notifications</strong> in Profile (must have notifications enabled on your device/s).</li>
+                <li>Sign up with your Lead&apos;s invite link and worker number — not the public signup page.</li>
+                <li>Turn on <strong>Notifications</strong> in Profile (must have notifications enabled on your device/s).</li>
                 <li>Open <strong>My Directives</strong> when your Lead assigns a directive.</li>
                 <li>Work items top to bottom — mark one done to unlock the next.</li>
                 <li>Open an item to mark it <strong>Current</strong> (your Lead sees that pill) and read details/files.</li>
@@ -107,23 +120,32 @@ export default function SettingsPage() {
 
           <p className="muted-text settings-profile-link">
             Notifications and password: <Link to="/profile">Profile</Link>
-            {isCrew ? ' · Your directives: ' : ' · Command view: '}
-            <Link to={isCrew ? '/my-cards' : '/dashboard'}>{isCrew ? 'My Directives' : 'Command view'}</Link>
+            {isTeamMember ? ' · Your directives: ' : ' · Command view: '}
+            <Link to={isTeamMember ? '/my-cards' : '/dashboard'}>
+              {isTeamMember ? 'My Directives' : 'Command view'}
+            </Link>
           </p>
+        </div>
+      )}
+
+      {tab === 'team' && isLead && (
+        <div className="settings-panel">
+          <TeamPanel />
         </div>
       )}
 
       {tab === 'upgrade' && (
         <div className="settings-panel settings-upgrade">
           <h2>Upgrade</h2>
-          <p className="muted-text">
-            Coming someday — higher team member limits, more Lead seats, and priority support.
-            For now, enjoy the current plan from the{' '}
-            <Link to="/home#pricing">pricing page</Link>.
-          </p>
-          <div className="settings-upgrade-placeholder">
-            <p>🚀 Upgrade options will live here.</p>
-          </div>
+          {isTeamMember ? (
+            <p className="muted-text">Only the account Lead can manage a subscription.</p>
+          ) : (
+            <p className="muted-text">
+              Compare plans and choose a subscription on the{' '}
+              <Link to="/home#pricing">pricing page</Link>.
+              Plan names are for billing only — your team always sees you as <strong>Lead</strong>.
+            </p>
+          )}
         </div>
       )}
     </section>

@@ -4,6 +4,7 @@ import ProtectedRoute from './components/ProtectedRoute'
 import ChecklistDetailPage from './pages/ChecklistDetailPage'
 import DashboardPage from './pages/DashboardPage'
 import ForgotPasswordPage from './pages/ForgotPasswordPage'
+import JoinLeadPage from './pages/JoinLeadPage'
 import LandingPage from './pages/LandingPage'
 import LoginPage from './pages/LoginPage'
 import MyCardsPage from './pages/MyCardsPage'
@@ -11,13 +12,14 @@ import ResetPasswordPage from './pages/ResetPasswordPage'
 import ProfilePage from './pages/ProfilePage'
 import SettingsPage from './pages/SettingsPage'
 import SignupPage from './pages/SignupPage'
+import TeamSignupPage from './pages/TeamSignupPage'
 import { useAuth } from './hooks/useAuth'
 
 function HomeRedirect() {
-  const { isAuthenticated, isCrew, initialized } = useAuth()
+  const { isAuthenticated, isTeamMember, initialized } = useAuth()
   if (!initialized) return null
   if (!isAuthenticated) return <Navigate to="/home" replace />
-  return <Navigate to={isCrew ? '/my-cards' : '/dashboard'} replace />
+  return <Navigate to={isTeamMember ? '/my-cards' : '/dashboard'} replace />
 }
 
 function App() {
@@ -27,6 +29,8 @@ function App() {
       <Route path="/home"           element={<LandingPage />} />
       <Route path="/login"          element={<LoginPage />} />
       <Route path="/signup"         element={<SignupPage />} />
+      <Route path="/team-signup"    element={<TeamSignupPage />} />
+      <Route path="/join-lead"      element={<JoinLeadPage />} />
       <Route path="/forgot-password" element={<ForgotPasswordPage />} />
       <Route path="/reset-password"  element={<ResetPasswordPage />} />
 

@@ -8,6 +8,10 @@ import type {
   CollaboratorProfile,
   CollaboratorRole,
   DashboardChecklist,
+  CoLeadInvite,
+  LeadNote,
+  TeamLeadMember,
+  TeamSlot,
   UserRole,
 } from './types'
 
@@ -27,21 +31,34 @@ function throwIfRls(error: { code?: string; message?: string } | null) {
   }
 }
 
-export async function fetchOwnedChecklists(userId: string): Promise<DashboardChecklist[]> {
+export async function fetchOwnedChecklists(_userId: string): Promise<DashboardChecklist[]> {
   return withRetry(async () => {
-    const { data, error } = await supabase
+    const { data, error } = await supabase.rpc('chkchk_get_team_checklists')
+    if (error) {
+      // Fall through to direct query — don't surface RPC blips as "Access Denied"
+      console.warn('chkchk_get_team_checklists failed:', error.message)
+    } else {
+      const rows = ((data ?? []) as DashboardChecklist[]).map((row) => ({
+        ...row,
+        status: (row.status ?? 'active') as import('./types').CardStatus,
+        team_id: row.team_id ?? null,
+        item_count: row.item_count ?? 0,
+      }))
+      if (rows.length > 0) return rows
+    }
+
+    // Fallback: personally owned orders (works even if team_id was never set)
+    const { data: owned, error: ownedError } = await supabase
       .from('chkchk_checklists')
-      // Hint the items→checklist FK — current_item_id creates a second relationship
-      // and PostgREST rejects an ambiguous embed with "Failed to load checklists".
       .select('*, chkchk_items!chkchk_items_checklist_id_fkey(count)')
-      .eq('user_id', userId)
+      .eq('user_id', _userId)
       .order('updated_at', { ascending: false })
+    if (ownedError) throw new Error(ownedError.message)
 
-    if (error) throw error
-
-    return (data ?? []).map((row) => ({
+    return (owned ?? []).map((row) => ({
       id: row.id,
       user_id: row.user_id,
+      team_id: row.team_id ?? null,
       title: row.title,
       description: row.description,
       status: (row.status ?? 'active') as import('./types').CardStatus,
@@ -53,12 +70,20 @@ export async function fetchOwnedChecklists(userId: string): Promise<DashboardChe
   })
 }
 
+export async function fetchMyTeamId(): Promise<string | null> {
+  const { data, error } = await supabase.rpc('chkchk_get_user_team_id')
+  if (error) return null
+  return data as string | null
+}
+
 export async function fetchAccessibleChecklistIds(userId: string): Promise<string[]> {
-  const { data: ownedFull, error: ownedError } = await supabase
-    .from('chkchk_checklists')
-    .select('id, updated_at')
-    .eq('user_id', userId)
-    .order('updated_at', { ascending: false })
+  const teamId = await fetchMyTeamId()
+
+  const ownedQuery = teamId
+    ? supabase.from('chkchk_checklists').select('id, updated_at').eq('team_id', teamId)
+    : supabase.from('chkchk_checklists').select('id, updated_at').eq('user_id', userId)
+
+  const { data: ownedFull, error: ownedError } = await ownedQuery.order('updated_at', { ascending: false })
 
   if (ownedError) throw ownedError
 
@@ -105,18 +130,18 @@ export async function fetchChecklistById(id: string): Promise<Checklist | null> 
 }
 
 export async function createChecklist(
-  userId: string,
+  _userId: string,
   title: string,
   description: string,
 ): Promise<Checklist> {
-  const { data, error } = await supabase
-    .from('chkchk_checklists')
-    .insert({ user_id: userId, title, description: description || null })
-    .select('*')
-    .single()
-
-  if (error) throwIfRls(error)
-  return data
+  // SECURITY DEFINER RPC — avoids INSERT…RETURNING RLS failures that show as "Access Denied"
+  const { data, error } = await supabase.rpc('chkchk_create_checklist', {
+    p_title: title.trim(),
+    p_description: description.trim() || null,
+  })
+  if (error) throw new Error(error.message)
+  if (!data) throw new Error('Could not create directive')
+  return data as Checklist
 }
 
 export async function updateChecklist(
@@ -251,10 +276,30 @@ export async function fetchCollaborators(checklistId: string): Promise<Collabora
         .eq('id', collaborator.user_id)
         .maybeSingle()
 
+      const { data: roleRow } = await supabase
+        .from('chkchk_user_roles')
+        .select('display_name')
+        .eq('user_id', collaborator.user_id)
+        .maybeSingle()
+
+      const { data: slotRow } = await supabase
+        .from('chkchk_team_slots')
+        .select('worker_number')
+        .eq('user_id', collaborator.user_id)
+        .eq('status', 'active')
+        .maybeSingle()
+
+      const email = profile?.email ?? null
+      const isTeamLocal = !!email && (
+        email.endsWith('@team.chkchk.local') || email.endsWith('@team.mytoc.local')
+      )
+
       return {
         ...collaborator,
         role: collaborator.role as CollaboratorRole,
-        email: profile?.email ?? null,
+        email: isTeamLocal ? null : email,
+        displayName: roleRow?.display_name ?? null,
+        workerNumber: slotRow?.worker_number ?? null,
       }
     }),
   )
@@ -380,15 +425,31 @@ export async function fetchMyRole(): Promise<{
   role: UserRole
   displayName: string
   isAvailable: boolean
+  leadCode: string | null
+  workerNumber: string | null
+  teamId: string | null
+  isPrimaryLead: boolean
 } | null> {
   const { data, error } = await supabase.rpc('chkchk_get_my_role')
   if (error || !data) return null
-  const result = data as { role: UserRole; display_name: string; is_available?: boolean } | null
+  const result = data as {
+    role: UserRole
+    display_name: string
+    is_available?: boolean
+    boss_code?: string | null
+    worker_number?: string | null
+    team_id?: string | null
+    is_primary_lead?: boolean
+  } | null
   if (!result?.role) return null
   return {
     role: result.role,
     displayName: result.display_name ?? '',
     isAvailable: result.is_available ?? true,
+    leadCode: result.boss_code ?? null,
+    workerNumber: result.worker_number ?? null,
+    teamId: result.team_id ?? null,
+    isPrimaryLead: result.is_primary_lead ?? false,
   }
 }
 
@@ -438,6 +499,9 @@ export interface TrialStatus {
   trial_started_at: string
   days_remaining: number
   is_expired: boolean
+  has_subscription?: boolean
+  plan_tier?: string | null
+  subscription_status?: string | null
 }
 
 export async function fetchTrialStatus(): Promise<TrialStatus | null> {
@@ -505,4 +569,136 @@ export async function notifyAssignee(
   })
   // Non-fatal: missing subscription / push failure shouldn't block invite
   if (error) console.warn('Push notification failed:', error)
+}
+
+// ---------------------------------------------------------------------------
+// Team roster (Lead ID + worker # invites)
+// ---------------------------------------------------------------------------
+
+export async function ensureLeadCode(): Promise<string> {
+  const { data, error } = await supabase.rpc('chkchk_ensure_boss_code')
+  if (error) throw error
+  return String(data)
+}
+
+export async function createTeamSlot(displayName: string): Promise<TeamSlot> {
+  const { data, error } = await supabase.rpc('chkchk_create_team_slot', {
+    p_display_name: displayName.trim(),
+  })
+  if (error) throw error
+  const row = data as { id: string; worker_number: string; display_name: string; status: string }
+  return {
+    id: row.id,
+    worker_number: row.worker_number,
+    display_name: row.display_name,
+    user_id: null,
+    status: row.status as TeamSlot['status'],
+    created_at: new Date().toISOString(),
+  }
+}
+
+export async function fetchTeamSlots(): Promise<TeamSlot[]> {
+  const { data, error } = await supabase.rpc('chkchk_list_team_slots')
+  if (error) throw error
+  return (data ?? []) as TeamSlot[]
+}
+
+export async function validateTeamSlot(leadCode: string, workerNumber: string): Promise<{ valid: boolean; display_name?: string }> {
+  const { data, error } = await supabase.rpc('chkchk_validate_team_slot', {
+    p_boss_code: leadCode.trim(),
+    p_worker_number: workerNumber.trim(),
+  })
+  if (error) throw error
+  return (data ?? { valid: false }) as { valid: boolean; display_name?: string }
+}
+
+export async function teamSignup(leadCode: string, workerNumber: string, password: string): Promise<{ email: string; display_name: string }> {
+  const { data, error } = await supabase.functions.invoke('team-signup-chkchk', {
+    body: { boss_code: leadCode.trim(), worker_number: workerNumber.trim(), password },
+  })
+  if (error) throw new Error(error.message)
+  if (data && typeof data === 'object' && 'error' in data && typeof data.error === 'string') {
+    throw new Error(data.error)
+  }
+  return data as { email: string; display_name: string }
+}
+
+export async function inviteRosterMember(
+  checklistId: string,
+  slotId: string,
+  role: CollaboratorRole = 'assignee',
+): Promise<string> {
+  const { data, error } = await supabase.rpc('chkchk_invite_roster_member', {
+    p_checklist_id: checklistId,
+    p_slot_id: slotId,
+    p_role: role,
+  })
+  if (error) throw error
+  return String(data)
+}
+
+// ---------------------------------------------------------------------------
+// Lead notes (private to team Leads on a directive)
+// ---------------------------------------------------------------------------
+
+export async function fetchLeadNotes(checklistId: string): Promise<LeadNote[]> {
+  const { data, error } = await supabase.rpc('chkchk_list_lead_notes', {
+    p_checklist_id: checklistId,
+  })
+  if (error) throw error
+  return (data ?? []) as LeadNote[]
+}
+
+export async function addLeadNote(checklistId: string, text: string): Promise<LeadNote> {
+  const { data, error } = await supabase.rpc('chkchk_add_lead_note', {
+    p_checklist_id: checklistId,
+    p_text: text.trim(),
+  })
+  if (error) throw error
+  return data as LeadNote
+}
+
+// ---------------------------------------------------------------------------
+// Co-Leads (shared Lead board)
+// ---------------------------------------------------------------------------
+
+export async function fetchTeamLeads(): Promise<TeamLeadMember[]> {
+  const { data, error } = await supabase.rpc('chkchk_list_team_leads')
+  if (error) throw error
+  return (data ?? []) as TeamLeadMember[]
+}
+
+export async function fetchCoLeadInvites(): Promise<CoLeadInvite[]> {
+  const { data, error } = await supabase.rpc('chkchk_list_co_lead_invites')
+  if (error) throw error
+  return (data ?? []) as CoLeadInvite[]
+}
+
+export async function inviteCoLead(email: string): Promise<CoLeadInvite> {
+  const { data, error } = await supabase.rpc('chkchk_invite_co_lead', {
+    p_email: email.trim(),
+  })
+  if (error) throw error
+  return data as CoLeadInvite
+}
+
+export async function validateCoLeadInvite(token: string): Promise<{ valid: boolean; email?: string }> {
+  const { data, error } = await supabase.rpc('chkchk_validate_co_lead_invite', {
+    p_token: token.trim(),
+  })
+  if (error) throw error
+  return (data ?? { valid: false }) as { valid: boolean; email?: string }
+}
+
+export async function acceptCoLeadInvite(token: string): Promise<void> {
+  const { error } = await supabase.rpc('chkchk_accept_co_lead_invite', {
+    p_token: token.trim(),
+  })
+  if (error) throw error
+}
+
+export async function ensureTeamForLead(): Promise<string> {
+  const { data, error } = await supabase.rpc('chkchk_ensure_team_for_lead')
+  if (error) throw error
+  return String(data)
 }

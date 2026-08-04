@@ -5,9 +5,9 @@ import {
   confirmCard,
   createChecklist,
   deleteChecklist,
+  fetchMyTeamId,
   fetchOwnedChecklists,
   rejectCard,
-  AccessDeniedError,
 } from '../lib/checklistApi'
 import type { CardStatus, DashboardChecklist } from '../lib/types'
 
@@ -38,15 +38,15 @@ export const useDashboardStore = create<DashboardState>((set, get) => ({
     set({ loading: true, error: null })
     try {
       const checklists = await fetchOwnedChecklists(userId)
-      set({ checklists, loading: false })
+      set({ checklists, loading: false, error: null })
     } catch (error) {
       const message =
-        error instanceof AccessDeniedError
-          ? 'Access Denied'
-          : error instanceof Error
-            ? error.message
-            : 'Failed to load directives'
-      set({ error: message, loading: false })
+        error instanceof Error ? error.message : 'Failed to load checklists'
+      // Never show vague "Access Denied" on a Lead's own dashboard
+      set({
+        error: message === 'Access Denied' ? 'Could not load orders. Try refreshing.' : message,
+        loading: false,
+      })
     }
   },
 
@@ -55,26 +55,33 @@ export const useDashboardStore = create<DashboardState>((set, get) => ({
   subscribe: (userId) => {
     get().unsubscribe()
 
-    const channel = supabase
-      .channel(`dashboard-checklists-${userId}`)
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'chkchk_checklists',
-          filter: `user_id=eq.${userId}`,
-        },
-        () => { void get().loadChecklists(userId) },
-      )
-      .on(
-        'postgres_changes',
-        { event: '*', schema: 'public', table: 'chkchk_items' },
-        () => { void get().loadChecklists(userId) },
-      )
-      .subscribe()
+    void (async () => {
+      const teamId = await fetchMyTeamId()
+      const filter = teamId
+        ? `team_id=eq.${teamId}`
+        : `user_id=eq.${userId}`
 
-    set({ channel })
+      const channel = supabase
+        .channel(`dashboard-checklists-${userId}`)
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'chkchk_checklists',
+            filter,
+          },
+          () => { void get().loadChecklists(userId) },
+        )
+        .on(
+          'postgres_changes',
+          { event: '*', schema: 'public', table: 'chkchk_items' },
+          () => { void get().loadChecklists(userId) },
+        )
+        .subscribe()
+
+      set({ channel })
+    })()
   },
 
   unsubscribe: () => {
@@ -92,7 +99,12 @@ export const useDashboardStore = create<DashboardState>((set, get) => ({
       await get().loadChecklists(userId)
       return checklist.id
     } catch (error) {
-      set({ error: error instanceof Error ? error.message : 'Failed to create directive' })
+      const raw = error instanceof Error ? error.message : 'Failed to create directive'
+      set({
+        error: raw === 'Access Denied'
+          ? 'Could not create directive. Sign out and back in, then try again.'
+          : raw,
+      })
       return null
     }
   },
@@ -105,7 +117,7 @@ export const useDashboardStore = create<DashboardState>((set, get) => ({
         checklists: state.checklists.filter((c) => c.id !== id),
       }))
     } catch (error) {
-      set({ error: error instanceof Error ? error.message : 'Failed to delete directive' })
+      set({ error: error instanceof Error ? error.message : 'Failed to delete checklist' })
     }
   },
 

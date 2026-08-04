@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import Alert from '../components/Alert'
+import LeadNotesPanel from '../components/LeadNotesPanel'
 import MessagesPanel from '../components/MessagesPanel'
 import ObjectivesSidebar from '../components/ObjectivesSidebar'
 import SettingsModal from '../components/SettingsModal'
@@ -10,15 +11,15 @@ import { useChecklistDetailStore } from '../stores/checklistDetailStore'
 
 const STATUS_LABELS: Record<string, string> = {
   active:                'Active',
-  awaiting_confirmation: 'Awaiting Confirm',
-  archived:              'Confirmed',
+  awaiting_confirmation: 'Awaiting Review',
+  archived:              'Archived',
 }
 
 export default function ChecklistDetailPage() {
   const { id } = useParams<{ id: string }>()
   const [searchParams, setSearchParams] = useSearchParams()
   const navigate = useNavigate()
-  const { user, isCrew } = useAuth()
+  const { user, isCrew, isLead } = useAuth()
 
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [shareOpen,    setShareOpen]    = useState(searchParams.get('share') === '1')
@@ -28,6 +29,8 @@ export default function ChecklistDetailPage() {
   const checklist        = useChecklistDetailStore((state) => state.checklist)
   const items            = useChecklistDetailStore((state) => state.items)
   const comments         = useChecklistDetailStore((state) => state.comments)
+  const leadNotes        = useChecklistDetailStore((state) => state.leadNotes)
+  const leadNoteAuthors  = useChecklistDetailStore((state) => state.leadNoteAuthors)
   const collaborators    = useChecklistDetailStore((state) => state.collaborators)
   const navigationIds    = useChecklistDetailStore((state) => state.navigationIds)
   const authorEmails     = useChecklistDetailStore((state) => state.authorEmails)
@@ -46,9 +49,11 @@ export default function ChecklistDetailPage() {
   const reorderLocalItems        = useChecklistDetailStore((state) => state.reorderLocalItems)
   const markItemCurrent          = useChecklistDetailStore((state) => state.markItemCurrent)
   const addComment               = useChecklistDetailStore((state) => state.addComment)
+  const addLeadNote                = useChecklistDetailStore((state) => state.addLeadNote)
   const saveSettings             = useChecklistDetailStore((state) => state.saveSettings)
   const deleteCurrentChecklist   = useChecklistDetailStore((state) => state.deleteCurrentChecklist)
   const inviteCollaboratorByEmail = useChecklistDetailStore((state) => state.inviteCollaboratorByEmail)
+  const inviteRosterMemberBySlot = useChecklistDetailStore((state) => state.inviteRosterMemberBySlot)
   const removeCollaboratorById   = useChecklistDetailStore((state) => state.removeCollaboratorById)
   const uploadItemAttachment     = useChecklistDetailStore((state) => state.uploadItemAttachment)
   const markComplete             = useChecklistDetailStore((state) => state.markComplete)
@@ -62,8 +67,11 @@ export default function ChecklistDetailPage() {
   const canEdit   = useMemo(() => {
     if (!user || !checklist) return false
     if (checklist.user_id === user.id) return true
+    if (isLead && checklist.team_id) return true
     return collaborators.some((c) => c.user_id === user.id && c.role === 'editor')
-  }, [user, checklist, collaborators])
+  }, [user, checklist, collaborators, isLead])
+
+  const canViewLeadNotes = isLead && !!checklist?.team_id
 
   const canToggle  = canEdit || isCardAssignee
   const canComment = canEdit || isCardAssignee
@@ -137,7 +145,7 @@ export default function ChecklistDetailPage() {
             className="btn btn-secondary btn-sm mobile-only"
             onClick={() => setSidebarOpen(true)}
           >
-            Items
+            📋 Items
           </button>
 
           {isCardAssignee && checklist.status === 'active' && (
@@ -173,7 +181,6 @@ export default function ChecklistDetailPage() {
             }
           </div>
         </div>
-
       </div>
 
       {error && <Alert variant="error" message={error} />}
@@ -210,6 +217,16 @@ export default function ChecklistDetailPage() {
             if (user) void addComment(itemId, user.id, text)
           }}
         />
+
+        {canViewLeadNotes && (
+          <LeadNotesPanel
+            notes={leadNotes}
+            authorNames={leadNoteAuthors}
+            currentUserId={user?.id ?? ''}
+            canPost={canEdit}
+            onAddNote={(text) => void addLeadNote(text)}
+          />
+        )}
       </div>
 
       {canEdit && (
@@ -230,12 +247,13 @@ export default function ChecklistDetailPage() {
         />
       )}
 
-      {isOwner && (
+      {canEdit && (
         <ShareModal
           open={shareOpen}
           onClose={() => setShareOpen(false)}
           collaborators={collaborators}
           onInvite={inviteCollaboratorByEmail}
+          onInviteRoster={inviteRosterMemberBySlot}
           onRemove={removeCollaboratorById}
           error={error}
         />

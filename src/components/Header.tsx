@@ -4,7 +4,7 @@ import { useAuth } from '../hooks/useAuth'
 import { useAuthStore } from '../stores/authStore'
 
 export default function Header() {
-  const { isAuthenticated, isCrew, isLead, displayName, user, leadAvailable } = useAuth()
+  const { isAuthenticated, isLead, isTeamMember, displayName, user, leadAvailable } = useAuth()
   const clearAuth = useAuthStore((state) => state.clearAuth)
   const navigate = useNavigate()
 
@@ -14,7 +14,7 @@ export default function Header() {
     navigate('/login')
   }
 
-  const homeLink = isCrew ? '/my-cards' : '/dashboard'
+  const homeLink = isTeamMember ? '/my-cards' : '/dashboard'
   const nameDisplay = displayName || user?.email?.split('@')[0] || ''
 
   return (
@@ -22,14 +22,13 @@ export default function Header() {
 
       {/* Left — role badge (or empty slot when logged out) */}
       <div className="app-header-left">
-        {isAuthenticated && (
-          isLead ? (
-            <span className={`app-logo-role ${leadAvailable ? 'app-logo-role-available' : 'app-logo-role-unavailable'}`}>
-              Lead · {leadAvailable ? 'Available' : 'Unavailable'}
-            </span>
-          ) : (
-            <span className="app-logo-role">Team Member</span>
-          )
+        {isAuthenticated && isLead && (
+          <span className={`app-logo-role ${leadAvailable ? 'app-logo-role-available' : 'app-logo-role-unavailable'}`}>
+            Lead · {leadAvailable ? 'Available' : 'Unavailable'}
+          </span>
+        )}
+        {isAuthenticated && isTeamMember && (
+          <span className="app-logo-role">Team Member</span>
         )}
       </div>
 

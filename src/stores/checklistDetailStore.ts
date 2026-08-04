@@ -3,6 +3,7 @@ import type { RealtimeChannel } from '@supabase/supabase-js'
 import { supabase } from '../lib/supabase'
 import {
   AccessDeniedError,
+  addLeadNote as createLeadNoteApi,
   createComment,
   createItem,
   deleteChecklist,
@@ -13,7 +14,9 @@ import {
   fetchCommentsForItems,
   fetchDisplayNames,
   fetchItems,
+  fetchLeadNotes,
   inviteCollaborator,
+  inviteRosterMember,
   markCardComplete,
   notifyAssignee,
   removeCollaborator,
@@ -29,15 +32,18 @@ import type {
   ChecklistItem,
   CollaboratorProfile,
   CollaboratorRole,
+  LeadNote,
 } from '../lib/types'
 
 interface ChecklistDetailState {
   checklist: Checklist | null
   items: ChecklistItem[]
   comments: ChecklistComment[]
+  leadNotes: LeadNote[]
   collaborators: CollaboratorProfile[]
   navigationIds: string[]
   authorEmails: Record<string, string>   // kept for compat, populated with display names
+  leadNoteAuthors: Record<string, string>
   loading: boolean
   accessDenied: boolean
   error: string | null
@@ -55,9 +61,11 @@ interface ChecklistDetailState {
   /** Crew opens a task card → marks it Current for Lead. */
   markItemCurrent: (itemId: string) => Promise<void>
   addComment: (itemId: string, userId: string, text: string) => Promise<void>
+  addLeadNote: (text: string) => Promise<void>
   saveSettings: (title: string, description: string) => Promise<void>
   deleteCurrentChecklist: () => Promise<boolean>
   inviteCollaboratorByEmail: (email: string, role: CollaboratorRole) => Promise<void>
+  inviteRosterMemberBySlot: (slotId: string, role: CollaboratorRole) => Promise<void>
   removeCollaboratorById: (id: string) => Promise<void>
   uploadItemAttachment: (itemId: string, userId: string, file: File) => Promise<void>
   markComplete: () => Promise<void>
@@ -67,9 +75,11 @@ export const useChecklistDetailStore = create<ChecklistDetailState>((set, get) =
   checklist: null,
   items: [],
   comments: [],
+  leadNotes: [],
   collaborators: [],
   navigationIds: [],
   authorEmails: {},
+  leadNoteAuthors: {},
   loading: false,
   accessDenied: false,
   error: null,
@@ -82,9 +92,11 @@ export const useChecklistDetailStore = create<ChecklistDetailState>((set, get) =
       checklist: null,
       items: [],
       comments: [],
+      leadNotes: [],
       collaborators: [],
       navigationIds: [],
       authorEmails: {},
+      leadNoteAuthors: {},
       loading: false,
       accessDenied: false,
       error: null,
@@ -111,17 +123,23 @@ export const useChecklistDetailStore = create<ChecklistDetailState>((set, get) =
       ])
 
       const comments = await fetchCommentsForItems(items.map((item) => item.id))
+      const leadNotes = await fetchLeadNotes(id)
       const authorEmails = await fetchDisplayNames([
         ...new Set(comments.map((comment) => comment.user_id)),
+      ])
+      const leadNoteAuthors = await fetchDisplayNames([
+        ...new Set(leadNotes.map((note) => note.user_id)),
       ])
 
       set({
         checklist,
         items,
         comments,
+        leadNotes,
         collaborators,
         navigationIds,
         authorEmails,
+        leadNoteAuthors,
         loading: false,
       })
     } catch (error) {
@@ -130,7 +148,7 @@ export const useChecklistDetailStore = create<ChecklistDetailState>((set, get) =
         return
       }
       set({
-        error: error instanceof Error ? error.message : 'Failed to load directive',
+        error: error instanceof Error ? error.message : 'Failed to load checklist',
         loading: false,
       })
     }
@@ -194,7 +212,27 @@ export const useChecklistDetailStore = create<ChecklistDetailState>((set, get) =
       )
       .subscribe()
 
-    set({ channels: [itemsChannel, commentsChannel, checklistChannel] })
+    const leadNotesChannel = supabase
+      .channel(`checklist-lead-notes-${checklistId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'chkchk_lead_notes',
+          filter: `checklist_id=eq.${checklistId}`,
+        },
+        async () => {
+          const leadNotes = await fetchLeadNotes(checklistId)
+          const leadNoteAuthors = await fetchDisplayNames([
+            ...new Set(leadNotes.map((note) => note.user_id)),
+          ])
+          set({ leadNotes, leadNoteAuthors })
+        },
+      )
+      .subscribe()
+
+    set({ channels: [itemsChannel, commentsChannel, checklistChannel, leadNotesChannel] })
   },
 
   unsubscribe: () => {
@@ -302,6 +340,21 @@ export const useChecklistDetailStore = create<ChecklistDetailState>((set, get) =
     }
   },
 
+  addLeadNote: async (text) => {
+    const { checklist, leadNotes } = get()
+    if (!checklist) return
+
+    try {
+      const note = await createLeadNoteApi(checklist.id, text)
+      const leadNoteAuthors = await fetchDisplayNames([
+        ...new Set([...leadNotes, note].map((n) => n.user_id)),
+      ])
+      set({ leadNotes: [...leadNotes, note], leadNoteAuthors, error: null })
+    } catch (error) {
+      set({ error: error instanceof Error ? error.message : 'Failed to add lead note' })
+    }
+  },
+
   saveSettings: async (title, description) => {
     const { checklist } = get()
     if (!checklist) return
@@ -322,7 +375,7 @@ export const useChecklistDetailStore = create<ChecklistDetailState>((set, get) =
       await deleteChecklist(checklist.id)
       return true
     } catch (error) {
-      set({ error: error instanceof Error ? error.message : 'Failed to delete directive' })
+      set({ error: error instanceof Error ? error.message : 'Failed to delete checklist' })
       return false
     }
   },
@@ -334,13 +387,30 @@ export const useChecklistDetailStore = create<ChecklistDetailState>((set, get) =
     try {
       const collab = await inviteCollaborator(checklist.id, email, role)
       const collaborators = await fetchCollaborators(checklist.id)
-      set({ collaborators })
+      set({ collaborators, error: null })
 
       if (role === 'assignee') {
         await notifyAssignee(checklist.id, collab.user_id)
       }
     } catch (error) {
       set({ error: error instanceof Error ? error.message : 'Failed to invite collaborator' })
+    }
+  },
+
+  inviteRosterMemberBySlot: async (slotId, role) => {
+    const { checklist } = get()
+    if (!checklist) return
+
+    try {
+      const userId = await inviteRosterMember(checklist.id, slotId, role)
+      const collaborators = await fetchCollaborators(checklist.id)
+      set({ collaborators, error: null })
+
+      if (role === 'assignee') {
+        await notifyAssignee(checklist.id, userId)
+      }
+    } catch (error) {
+      set({ error: error instanceof Error ? error.message : 'Failed to assign team member' })
     }
   },
 

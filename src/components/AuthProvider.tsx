@@ -1,6 +1,5 @@
 import { useEffect } from 'react'
-import { fetchMyRole } from '../lib/checklistApi'
-import { getSupabaseConfig } from '../lib/env'
+import { syncAuthRoleFromServer } from '../lib/leadBootstrap'
 import { supabase } from '../lib/supabase'
 import { useAuthStore } from '../stores/authStore'
 
@@ -10,21 +9,18 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
   const setUserRole = useAuthStore((state) => state.setUserRole)
   const setDisplayName = useAuthStore((state) => state.setDisplayName)
   const setLeadAvailable = useAuthStore((state) => state.setLeadAvailable)
+  const setTeamMeta = useAuthStore((state) => state.setTeamMeta)
 
   useEffect(() => {
     let mounted = true
-    const config = getSupabaseConfig()
 
-    // Marketing / local preview without keys — don't block the UI.
-    if (!config.ok) {
-      setAuth(null)
-      setUserRole(null)
-      setDisplayName(null)
-      setLeadAvailable(true)
-      setInitialized(true)
-      return () => {
-        mounted = false
-      }
+    async function applyRole() {
+      const result = await syncAuthRoleFromServer()
+      if (!mounted) return
+      setUserRole(result?.role ?? null)
+      setDisplayName(result?.displayName ?? null)
+      setLeadAvailable(result?.isAvailable ?? true)
+      setTeamMeta(result?.teamId ?? null, result?.isPrimaryLead ?? false)
     }
 
     async function initSession() {
@@ -33,12 +29,7 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
       setAuth(session)
 
       if (session) {
-        const result = await fetchMyRole()
-        if (mounted) {
-          setUserRole(result?.role ?? null)
-          setDisplayName(result?.displayName ?? null)
-          setLeadAvailable(result?.isAvailable ?? true)
-        }
+        await applyRole()
       }
 
       setInitialized(true)
@@ -49,16 +40,14 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
       setAuth(session)
       if (session) {
-        const result = await fetchMyRole()
+        await applyRole()
+      } else {
         if (mounted) {
-          setUserRole(result?.role ?? null)
-          setDisplayName(result?.displayName ?? null)
-          setLeadAvailable(result?.isAvailable ?? true)
+          setUserRole(null)
+          setDisplayName(null)
+          setLeadAvailable(true)
+          setTeamMeta(null, false)
         }
-      } else if (mounted) {
-        setUserRole(null)
-        setDisplayName(null)
-        setLeadAvailable(true)
       }
       setInitialized(true)
     })
@@ -67,7 +56,7 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
       mounted = false
       subscription.unsubscribe()
     }
-  }, [setAuth, setInitialized, setUserRole, setDisplayName, setLeadAvailable])
+  }, [setAuth, setInitialized, setUserRole, setDisplayName, setLeadAvailable, setTeamMeta])
 
   return <>{children}</>
 }

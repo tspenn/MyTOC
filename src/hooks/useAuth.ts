@@ -7,6 +7,8 @@ export function useAuth() {
   const userRole = useAuthStore((state) => state.userRole)
   const displayName = useAuthStore((state) => state.displayName)
   const leadAvailable = useAuthStore((state) => state.leadAvailable)
+  const isPrimaryLead = useAuthStore((state) => state.isPrimaryLead)
+  const teamId = useAuthStore((state) => state.teamId)
 
   return {
     user,
@@ -15,11 +17,13 @@ export function useAuth() {
     userRole,
     displayName,
     leadAvailable,
+    teamId,
+    isPrimaryLead,
     isAuthenticated: !!session,
     isLead: userRole === 'assigner',
-    isCrew: userRole === 'assignee',
-    // legacy aliases kept for backward compat while migrating
-    isAssigner: userRole === 'assigner',
-    isAssignee: userRole === 'assignee',
+    isTeamMember: userRole === 'assignee',
+    isCrew: userRole === 'assignee', // legacy alias
+    isAssigner: userRole === 'assigner', // legacy alias
+    isAssignee: userRole === 'assignee', // legacy alias
   }
 }

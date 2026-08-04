@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useNavigate, useSearchParams } from 'react-router-dom'
+import { Navigate, useNavigate, useSearchParams } from 'react-router-dom'
 import Alert from '../components/Alert'
 import ChecklistCard from '../components/ChecklistCard'
 import CreateChecklistModal from '../components/CreateChecklistModal'
@@ -14,7 +14,7 @@ const STATUS_TABS: { value: CardStatus; label: string; emoji: string }[] = [
 ]
 
 export default function DashboardPage() {
-  const { user, displayName } = useAuth()
+  const { user, displayName, isTeamMember } = useAuth()
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const [createOpen, setCreateOpen] = useState(false)
@@ -57,6 +57,10 @@ export default function DashboardPage() {
   }
 
   const greeting = displayName ? `${displayName}'s Directives` : 'My Directives'
+
+  if (isTeamMember) {
+    return <Navigate to="/my-cards" replace />
+  }
 
   return (
     <section className="dashboard-page">

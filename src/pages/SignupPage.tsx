@@ -1,29 +1,42 @@
-import { FormEvent, useState } from 'react'
-import { Navigate, useNavigate } from 'react-router-dom'
+import { FormEvent, useEffect, useState } from 'react'
+import { Link, Navigate, useNavigate, useSearchParams } from 'react-router-dom'
 import Alert from '../components/Alert'
 import AuthLayout from '../components/AuthLayout'
 import FormField from '../components/FormField'
 import { useAuth } from '../hooks/useAuth'
 import { getAuthErrorMessage, validateSignupForm } from '../lib/authErrors'
-import { setMyRole } from '../lib/checklistApi'
+import {
+  acceptCoLeadInvite,
+  ensureLeadCode,
+  ensureTeamForLead,
+  fetchMyRole,
+  setMyRole,
+} from '../lib/checklistApi'
+import { clearPendingCoLeadInvite, clearPendingLeadSignup, savePendingCoLeadInvite, savePendingLeadSignup } from '../lib/leadBootstrap'
 import { supabase } from '../lib/supabase'
 import { useAuthStore } from '../stores/authStore'
-import type { UserRole } from '../lib/types'
 
 export default function SignupPage() {
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+  const coLeadToken = searchParams.get('colead')
+  const invitedEmail = searchParams.get('email')
   const { isAuthenticated, initialized } = useAuth()
-  const setUserRole    = useAuthStore((state) => state.setUserRole)
+  const setUserRole = useAuthStore((state) => state.setUserRole)
   const setDisplayName = useAuthStore((state) => state.setDisplayName)
+  const setTeamMeta = useAuthStore((state) => state.setTeamMeta)
 
-  const [email,           setEmail]           = useState('')
-  const [displayName,     setDisplayNameVal]  = useState('')
-  const [password,        setPassword]        = useState('')
+  const [email, setEmail] = useState(invitedEmail ?? '')
+  const [displayName, setDisplayNameVal] = useState('')
+  const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
-  const [role,            setRole]            = useState<UserRole>('assigner')
-  const [error,           setError]           = useState<string | null>(null)
-  const [success,         setSuccess]         = useState<string | null>(null)
-  const [loading,         setLoading]         = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [success, setSuccess] = useState<string | null>(null)
+  const [loading, setLoading] = useState(false)
+
+  useEffect(() => {
+    if (coLeadToken) savePendingCoLeadInvite(coLeadToken)
+  }, [coLeadToken])
 
   if (!initialized) {
     return (
@@ -35,6 +48,22 @@ export default function SignupPage() {
 
   if (isAuthenticated) {
     return <Navigate to="/dashboard" replace />
+  }
+
+  async function finishLeadSetup(name: string) {
+    await setMyRole('assigner', { displayName: name })
+    if (coLeadToken) {
+      await acceptCoLeadInvite(coLeadToken)
+    } else {
+      await ensureTeamForLead()
+      await ensureLeadCode()
+    }
+    clearPendingLeadSignup()
+    clearPendingCoLeadInvite()
+    const teamRole = await fetchMyRole()
+    setUserRole('assigner')
+    setDisplayName(teamRole?.displayName ?? name)
+    setTeamMeta(teamRole?.teamId ?? null, teamRole?.isPrimaryLead ?? false)
   }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -66,8 +95,6 @@ export default function SignupPage() {
       return
     }
 
-    // Supabase returns identities === [] when the email already exists in the
-    // shared project — no email is sent and signUp() still returns "success".
     if ((data?.user?.identities?.length ?? 1) === 0) {
       setLoading(false)
       setError('__existing__')
@@ -76,30 +103,34 @@ export default function SignupPage() {
 
     if (data.session) {
       try {
-        await setMyRole(role, {
-          displayName: displayName.trim(),
-        })
-        setUserRole(role)
-        setDisplayName(displayName.trim())
-      } catch {
-        // Non-fatal — role can be set later
+        await finishLeadSetup(displayName.trim())
+      } catch (err) {
+        setLoading(false)
+        setError(err instanceof Error ? err.message : 'Could not finish Lead setup')
+        return
       }
       setLoading(false)
-      navigate(role === 'assignee' ? '/my-cards' : '/dashboard', { replace: true })
+      navigate('/dashboard', { replace: true })
       return
     }
 
+    // Email confirmation required — remember Lead setup for first sign-in.
+    savePendingLeadSignup(displayName.trim())
     setLoading(false)
-    setSuccess('Account created! Check your email to confirm, then sign in.')
+    setSuccess('Account created! Check your email to confirm, then sign in as Lead.')
   }
 
   return (
     <AuthLayout
-      title="Join MyTOC"
-      subtitle="Issue directives. Track ownership. Confirm done."
+      title={coLeadToken ? 'Join as co-Lead' : 'Join MyTOC'}
+      subtitle={
+        coLeadToken
+          ? 'Create your Lead account to share the same board.'
+          : 'Lead accounts only. Team members join with a Lead ID invite — not here.'
+      }
       footerText="Already have an account?"
       footerLinkText="Sign in"
-      footerLinkTo="/login"
+      footerLinkTo={coLeadToken ? `/login?colead=${encodeURIComponent(coLeadToken)}` : '/login'}
     >
       <form className="auth-form" onSubmit={handleSubmit}>
         {error === '__existing__' ? (
@@ -145,38 +176,15 @@ export default function SignupPage() {
           autoComplete="new-password"
         />
 
-        <fieldset className="role-selector">
-          <legend>I am a…</legend>
-          <label className={`role-option ${role === 'assigner' ? 'role-option-selected' : ''}`}>
-            <input
-              type="radio"
-              name="role"
-              value="assigner"
-              checked={role === 'assigner'}
-              onChange={() => setRole('assigner')}
-            />
-            <div>
-              <strong>Lead (COO / Executive)</strong>
-              <span>Create directives, assign team members, confirm done</span>
-            </div>
-          </label>
-          <label className={`role-option ${role === 'assignee' ? 'role-option-selected' : ''}`}>
-            <input
-              type="radio"
-              name="role"
-              value="assignee"
-              checked={role === 'assignee'}
-              onChange={() => setRole('assignee')}
-            />
-            <div>
-              <strong>Team Member</strong>
-              <span>Receive directives via notifications, work items, mark done</span>
-            </div>
-          </label>
-        </fieldset>
+        <p className="auth-helper muted-text">
+          Team member? Use the invite link or Lead ID from your Lead —{' '}
+          <Link to="/team-signup">join your team</Link>
+          {' '}or{' '}
+          <Link to="/login?mode=team">sign in</Link>.
+        </p>
 
         <button type="submit" className="btn btn-primary btn-full" disabled={loading}>
-          {loading ? 'Creating account…' : 'Create account'}
+          {loading ? 'Creating account…' : 'Create Lead account'}
         </button>
 
         <p className="auth-privacy-note">
