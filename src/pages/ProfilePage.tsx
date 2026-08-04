@@ -1,7 +1,8 @@
 import { FormEvent, useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import Alert from '../components/Alert'
 import FormField from '../components/FormField'
+import InstallAppButton from '../components/InstallAppButton'
 import { useAuth } from '../hooks/useAuth'
 import { getAuthErrorMessage } from '../lib/authErrors'
 import { updateDisplayName, updateLeadAvailability } from '../lib/checklistApi'
@@ -257,8 +258,9 @@ export default function ProfilePage() {
       <div className="profile-section">
         <h2>Notifications</h2>
         <p className="muted-text">
-          Get a Ping when you are assigned to a directive. Must have notifications turned on on your device/s.
-          Install MyTOC (or allow notifications in the browser) on each phone or computer you want pinged.
+          Get a ping when you are assigned to a directive. Install MyTOC on each phone or computer you want
+          pinged, then turn notifications on here. Step-by-step install help is in{' '}
+          <Link to="/settings">Settings → How to use</Link>.
         </p>
         {pushError && <Alert variant="error" message={pushError} />}
         <div className="profile-notify-row">
@@ -270,14 +272,17 @@ export default function ProfilePage() {
                 : 'Optional on Lead accounts — turn on if you also receive assignments.'}
             </p>
           </div>
-          <button
-            type="button"
-            className={`btn ${pushEnabled ? 'btn-primary' : 'btn-outline'}`}
-            disabled={pushBusy || pushPermission === 'unsupported'}
-            onClick={() => void handlePushToggle(!pushEnabled)}
-          >
-            {pushBusy ? 'Working…' : pushEnabled ? 'Turn off' : 'Turn on'}
-          </button>
+          <div className="profile-notify-actions">
+            <InstallAppButton size="sm" />
+            <button
+              type="button"
+              className={`btn ${pushEnabled ? 'btn-primary' : 'btn-outline'}`}
+              disabled={pushBusy || pushPermission === 'unsupported'}
+              onClick={() => void handlePushToggle(!pushEnabled)}
+            >
+              {pushBusy ? 'Working…' : pushEnabled ? 'Turn off' : 'Turn on'}
+            </button>
+          </div>
         </div>
         {pushPermission === 'denied' && (
           <p className="muted-text small-text" style={{ color: '#f87171', marginTop: '0.75rem' }}>

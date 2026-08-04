@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import InstallAppButton from '../components/InstallAppButton'
 
 const STARTER_FEATURES = [
   '1 Lead account',
@@ -46,6 +47,7 @@ export default function LandingPage() {
             <Link to="/signup" className="btn btn-gold btn-lg">
               Launch Your TOC
             </Link>
+            <InstallAppButton className="btn-lg" />
           </div>
         </div>
       </section>

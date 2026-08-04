@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
+import InstallGuide from '../components/InstallGuide'
 import TeamPanel from '../components/TeamPanel'
 import { useAuth } from '../hooks/useAuth'
 
@@ -97,7 +98,7 @@ export default function SettingsPage() {
                 <li>Add items under <strong>Items</strong> in the order team members should work them.</li>
                 <li>Drag the ⠿ handle to reorder anytime — the <strong>Current</strong> item cannot be moved.</li>
                 <li>Open an item to edit details or attach files <em>before</em> it is marked done.</li>
-                <li>Use <strong>Assign</strong> to add a team member (Lead ID invite from Settings → Team, or email).</li>
+                <li>Use <strong>Assign</strong> to add a team member from your roster (invite link from Settings → Team).</li>
                 <li>Set your <strong>Availability</strong> in Profile so team members know when you are taking directives.</li>
                 <li>After an item is marked done, change requests go through <strong>Messages</strong>.</li>
                 <li>When a Team Member marks the directive done, review and confirm (or send it back).</li>
@@ -108,7 +109,7 @@ export default function SettingsPage() {
               <h2>For Team Members</h2>
               <ol>
                 <li>Sign up with your Lead&apos;s invite link and worker number — not the public signup page.</li>
-                <li>Turn on <strong>Notifications</strong> in Profile (must have notifications enabled on your device/s).</li>
+                <li>Install MyTOC on your phone (see below), then turn on <strong>Notifications</strong> in Profile.</li>
                 <li>Open <strong>My Directives</strong> when your Lead assigns a directive.</li>
                 <li>Work items top to bottom — mark one done to unlock the next.</li>
                 <li>Open an item to mark it <strong>Current</strong> (your Lead sees that pill) and read details/files.</li>
@@ -117,6 +118,8 @@ export default function SettingsPage() {
               </ol>
             </article>
           </div>
+
+          <InstallGuide />
 
           <p className="muted-text settings-profile-link">
             Notifications and password: <Link to="/profile">Profile</Link>

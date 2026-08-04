@@ -3,7 +3,9 @@
   "short_name": "MyTOC",
   "description": "Operations command center for COOs and executive teams.",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
+  "orientation": "any",
   "background_color": "#0c1018",
   "theme_color": "#174a8d",
   "icons": [

@@ -1,4 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom'
+import InstallAppButton from './InstallAppButton'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
 import { useAuthStore } from '../stores/authStore'
@@ -41,19 +42,21 @@ export default function Header() {
       <nav className="app-nav app-header-right">
         {isAuthenticated ? (
           <>
+            <InstallAppButton size="sm" className="app-nav-install" />
             <Link to="/settings" className="app-nav-link">Settings</Link>
             {nameDisplay && (
-              <Link to="/profile" className="app-nav-user">
+              <Link to="/profile" className="app-nav-user" title={nameDisplay}>
                 <span className="app-nav-avatar">{nameDisplay.charAt(0).toUpperCase()}</span>
                 <span className="app-nav-name">{nameDisplay}</span>
               </Link>
             )}
-            <button type="button" className="btn btn-secondary btn-sm" onClick={handleLogout}>
+            <button type="button" className="btn btn-secondary btn-sm app-nav-logout" onClick={handleLogout}>
               Log out
             </button>
           </>
         ) : (
           <>
+            <InstallAppButton size="sm" className="app-nav-install" />
             <Link to="/home#pricing" className="app-nav-pricing">Pricing</Link>
             <Link to="/login">Log in</Link>
             <Link to="/signup" className="btn btn-gold btn-sm">Sign up free</Link>
