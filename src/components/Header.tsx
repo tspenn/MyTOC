@@ -35,7 +35,7 @@ export default function Header() {
 
       {/* Center — MyTOC logo */}
       <Link to={isAuthenticated ? homeLink : '/home'} className="app-logo" title="Tactical Operations Command">
-        <img src="/Logo.jpg" alt="MyTOC" className="app-logo-img" />
+        <img src="/Logo.jpg" alt="TOC" className="app-logo-img" />
       </Link>
 
       {/* Right — nav */}
