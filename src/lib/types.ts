@@ -27,7 +27,8 @@ export interface ChecklistItem {
 
 export interface ChecklistComment {
   id: string
-  item_id: string
+  item_id: string | null
+  checklist_id: string | null
   user_id: string
   text: string
   created_at: string
@@ -43,7 +44,9 @@ export interface ChecklistCollaborator {
 
 export interface ChecklistAttachment {
   id: string
-  item_id: string
+  item_id: string | null
+  checklist_id: string | null
+  uploaded_by: string | null
   file_url: string
   file_name: string
   file_size: number

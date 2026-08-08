@@ -384,6 +384,194 @@ a:hover { text-decoration: underline; color: var(--violet); }
   gap: 0.875rem;
   align-items: start;
 }
+.detail-layout .order-files-panel,
+.detail-layout .lead-notes-panel {
+  grid-column: 1 / -1;
+}
+
+.order-files-panel {
+  padding: 0.85rem 1rem;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+.order-files-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.65rem;
+}
+.order-files-header h2 {
+  margin: 0 0 0.2rem;
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--charcoal);
+}
+.order-files-upload-btn { white-space: nowrap; cursor: pointer; }
+.order-files-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+.order-file-row {
+  display: grid;
+  grid-template-columns: 56px 1fr auto;
+  gap: 0.65rem;
+  align-items: center;
+  padding: 0.45rem 0.55rem;
+  background: var(--cream);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+.order-file-preview {
+  width: 64px;
+  height: 64px;
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--cream-dark);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border: 1px solid var(--border);
+}
+.order-file-preview-link {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.order-file-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  background: #ddd8d0;
+}
+.order-file-video-link,
+.order-file-doc {
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: var(--charcoal);
+  text-decoration: none;
+  letter-spacing: 0.02em;
+}
+.order-file-meta { min-width: 0; }
+.order-file-name {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  text-align: left;
+  font: inherit;
+  font-weight: 700;
+  color: var(--charcoal);
+  text-decoration: none;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.order-file-name:hover { color: var(--blue); }
+.order-file-actions {
+  display: flex;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+}
+
+.file-upload-btn { position: relative; }
+.file-count-badge {
+  position: absolute;
+  top: -0.35rem;
+  right: -0.35rem;
+  min-width: 1rem;
+  height: 1rem;
+  padding: 0 0.25rem;
+  border-radius: 999px;
+  background: var(--blue);
+  color: #fff;
+  font-size: 0.65rem;
+  font-weight: 800;
+  line-height: 1rem;
+  text-align: center;
+}
+.objective-files {
+  margin-top: 0.65rem;
+  padding-top: 0.55rem;
+  border-top: 1px solid var(--border);
+}
+.objective-files-label {
+  margin: 0 0 0.35rem;
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+.objective-files-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+.objective-files-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+.objective-file-preview {
+  width: 40px;
+  height: 40px;
+  border-radius: 6px;
+  overflow: hidden;
+  background: var(--cream-dark);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border: 1px solid var(--border);
+}
+.objective-file-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.objective-files-actions {
+  display: flex;
+  gap: 0.35rem;
+  flex-shrink: 0;
+}
+.objective-files-list a {
+  color: var(--charcoal);
+  font-weight: 600;
+  text-decoration: none;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+  min-width: 0;
+}
+.objective-files-list a:hover { color: var(--blue); }
+
+@media (max-width: 640px) {
+  .order-file-row {
+    grid-template-columns: 56px 1fr;
+  }
+  .order-file-actions {
+    grid-column: 1 / -1;
+  }
+  .objective-files-list li {
+    flex-wrap: wrap;
+  }
+}
 
 /* ─── Objectives sidebar ────────────────────────────────────────────────────── */
 .objectives-sidebar {
@@ -2469,9 +2657,5 @@ a:hover { text-decoration: underline; color: var(--violet); }
   border-radius: 8px;
   padding: 0.6rem 0.75rem;
   resize: vertical;
-}
-
-.detail-layout .lead-notes-panel {
-  grid-column: 1 / -1;
 }
 

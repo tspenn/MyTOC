@@ -8,8 +8,11 @@ interface MessagesPanelProps {
   authorNames: Record<string, string>
   canComment: boolean
   currentUserId: string
-  onAddComment: (itemId: string, text: string) => void
+  /** Pass null itemId for a directive-wide note (not tied to an item). */
+  onAddComment: (itemId: string | null, text: string) => void
 }
+
+const DIRECTIVE_WIDE = ''
 
 function formatMsgDate(iso: string) {
   const d = new Date(iso)
@@ -29,7 +32,7 @@ export default function MessagesPanel({
   currentUserId,
   onAddComment,
 }: MessagesPanelProps) {
-  const [selectedItemId, setSelectedItemId] = useState('')
+  const [selectedItemId, setSelectedItemId] = useState(DIRECTIVE_WIDE)
   const [text, setText] = useState('')
 
   const itemMap = useMemo(
@@ -46,12 +49,11 @@ export default function MessagesPanel({
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
-    if (!selectedItemId || !text.trim() || !canComment) return
-    onAddComment(selectedItemId, text.trim())
+    if (!text.trim() || !canComment) return
+    const itemId = selectedItemId === DIRECTIVE_WIDE ? null : selectedItemId
+    onAddComment(itemId, text.trim())
     setText('')
   }
-
-  const defaultItemId = items.length === 1 ? items[0].id : selectedItemId
 
   return (
     <section className="messages-panel">
@@ -61,7 +63,9 @@ export default function MessagesPanel({
 
       <div className="messages-table-wrap">
         {sorted.length === 0 ? (
-          <p className="muted-text messages-empty">No messages yet. Be the first to post!</p>
+          <p className="muted-text messages-empty">
+            No messages yet. Send a note on the whole directive, or about a specific item.
+          </p>
         ) : (
           <table className="messages-table">
             <thead>
@@ -77,7 +81,9 @@ export default function MessagesPanel({
                 const isMe = comment.user_id === currentUserId
                 const name = authorNames[comment.user_id]
                   ?? (isMe ? 'You' : `User…${comment.user_id.slice(-4)}`)
-                const task = itemMap.get(comment.item_id) ?? '—'
+                const task = comment.item_id
+                  ? (itemMap.get(comment.item_id) ?? 'Item')
+                  : 'Whole directive'
                 return (
                   <tr key={comment.id} className={isMe ? 'msg-row-mine' : ''}>
                     <td className="msg-date">{formatMsgDate(comment.created_at)}</td>
@@ -86,7 +92,9 @@ export default function MessagesPanel({
                       {name}
                     </td>
                     <td className="msg-text">{comment.text}</td>
-                    <td className="msg-item" title={task}>{task.length > 24 ? task.slice(0, 22) + '…' : task}</td>
+                    <td className="msg-item" title={task}>
+                      {task.length > 24 ? `${task.slice(0, 22)}…` : task}
+                    </td>
                   </tr>
                 )
               })}
@@ -95,24 +103,24 @@ export default function MessagesPanel({
         )}
       </div>
 
-      {canComment && items.length > 0 && (
+      {canComment && (
         <form className="message-compose" onSubmit={handleSubmit}>
           <select
             className="message-compose-item"
-            value={defaultItemId}
+            value={selectedItemId}
             onChange={(e) => setSelectedItemId(e.target.value)}
-            required
+            aria-label="Message about"
           >
-            <option value="">Item…</option>
+            <option value={DIRECTIVE_WIDE}>Whole directive</option>
             {items.map((item) => (
               <option key={item.id} value={item.id}>
-                {item.task.length > 40 ? item.task.slice(0, 38) + '…' : item.task}
+                {item.task.length > 40 ? `${item.task.slice(0, 38)}…` : item.task}
               </option>
             ))}
           </select>
           <textarea
             className="message-compose-text"
-            placeholder="Type a message…"
+            placeholder="e.g. Looks good — please attach the final PDF. Or: use landscape images…"
             value={text}
             rows={2}
             onChange={(e) => setText(e.target.value)}

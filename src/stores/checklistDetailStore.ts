@@ -4,14 +4,17 @@ import { supabase } from '../lib/supabase'
 import {
   AccessDeniedError,
   addLeadNote as createLeadNoteApi,
+  confirmCard,
   createComment,
   createItem,
+  deleteAttachment,
   deleteChecklist,
   deleteItem,
   fetchAccessibleChecklistIds,
+  fetchAttachmentsForChecklist,
   fetchChecklistById,
   fetchCollaborators,
-  fetchCommentsForItems,
+  fetchCommentsForChecklist,
   fetchDisplayNames,
   fetchItems,
   fetchLeadNotes,
@@ -25,9 +28,11 @@ import {
   updateChecklist,
   updateItem,
   uploadAttachment,
+  uploadOrderFile,
 } from '../lib/checklistApi'
 import type {
   Checklist,
+  ChecklistAttachment,
   ChecklistComment,
   ChecklistItem,
   CollaboratorProfile,
@@ -40,10 +45,12 @@ interface ChecklistDetailState {
   items: ChecklistItem[]
   comments: ChecklistComment[]
   leadNotes: LeadNote[]
+  attachments: ChecklistAttachment[]
   collaborators: CollaboratorProfile[]
   navigationIds: string[]
-  authorEmails: Record<string, string>   // kept for compat, populated with display names
+  authorEmails: Record<string, string>
   leadNoteAuthors: Record<string, string>
+  fileUploaderNames: Record<string, string>
   loading: boolean
   accessDenied: boolean
   error: string | null
@@ -58,9 +65,8 @@ interface ChecklistDetailState {
   addItem: (task: string) => Promise<void>
   removeItem: (itemId: string) => Promise<void>
   reorderLocalItems: (items: ChecklistItem[]) => Promise<void>
-  /** Crew opens a task card → marks it Current for Lead. */
   markItemCurrent: (itemId: string) => Promise<void>
-  addComment: (itemId: string, userId: string, text: string) => Promise<void>
+  addComment: (itemId: string | null, userId: string, text: string) => Promise<void>
   addLeadNote: (text: string) => Promise<void>
   saveSettings: (title: string, description: string) => Promise<void>
   deleteCurrentChecklist: () => Promise<boolean>
@@ -68,7 +74,10 @@ interface ChecklistDetailState {
   inviteRosterMemberBySlot: (slotId: string, role: CollaboratorRole) => Promise<void>
   removeCollaboratorById: (id: string) => Promise<void>
   uploadItemAttachment: (itemId: string, userId: string, file: File) => Promise<void>
+  uploadOrderAttachment: (userId: string, file: File) => Promise<void>
+  removeAttachment: (attachmentId: string) => Promise<void>
   markComplete: () => Promise<void>
+  archiveOrder: () => Promise<boolean>
 }
 
 export const useChecklistDetailStore = create<ChecklistDetailState>((set, get) => ({
@@ -76,10 +85,12 @@ export const useChecklistDetailStore = create<ChecklistDetailState>((set, get) =
   items: [],
   comments: [],
   leadNotes: [],
+  attachments: [],
   collaborators: [],
   navigationIds: [],
   authorEmails: {},
   leadNoteAuthors: {},
+  fileUploaderNames: {},
   loading: false,
   accessDenied: false,
   error: null,
@@ -93,10 +104,12 @@ export const useChecklistDetailStore = create<ChecklistDetailState>((set, get) =
       items: [],
       comments: [],
       leadNotes: [],
+      attachments: [],
       collaborators: [],
       navigationIds: [],
       authorEmails: {},
       leadNoteAuthors: {},
+      fileUploaderNames: {},
       loading: false,
       accessDenied: false,
       error: null,
@@ -117,12 +130,16 @@ export const useChecklistDetailStore = create<ChecklistDetailState>((set, get) =
         return
       }
 
-      const [items, collaborators] = await Promise.all([
+      const [items, collaborators, attachments] = await Promise.all([
         fetchItems(id),
         fetchCollaborators(id),
+        fetchAttachmentsForChecklist(id),
       ])
 
-      const comments = await fetchCommentsForItems(items.map((item) => item.id))
+      const comments = await fetchCommentsForChecklist(
+        id,
+        items.map((item) => item.id),
+      )
       const leadNotes = await fetchLeadNotes(id)
       const authorEmails = await fetchDisplayNames([
         ...new Set(comments.map((comment) => comment.user_id)),
@@ -130,16 +147,25 @@ export const useChecklistDetailStore = create<ChecklistDetailState>((set, get) =
       const leadNoteAuthors = await fetchDisplayNames([
         ...new Set(leadNotes.map((note) => note.user_id)),
       ])
+      const fileUploaderNames = await fetchDisplayNames([
+        ...new Set(
+          attachments
+            .map((file) => file.uploaded_by)
+            .filter((uid): uid is string => Boolean(uid)),
+        ),
+      ])
 
       set({
         checklist,
         items,
         comments,
         leadNotes,
+        attachments,
         collaborators,
         navigationIds,
         authorEmails,
         leadNoteAuthors,
+        fileUploaderNames,
         loading: false,
       })
     } catch (error) {
@@ -169,7 +195,10 @@ export const useChecklistDetailStore = create<ChecklistDetailState>((set, get) =
         },
         async () => {
           const items = await fetchItems(checklistId)
-          const comments = await fetchCommentsForItems(items.map((item) => item.id))
+          const comments = await fetchCommentsForChecklist(
+            checklistId,
+            items.map((item) => item.id),
+          )
           set({ items, comments })
         },
       )
@@ -186,7 +215,10 @@ export const useChecklistDetailStore = create<ChecklistDetailState>((set, get) =
         },
         async () => {
           const { items } = get()
-          const comments = await fetchCommentsForItems(items.map((item) => item.id))
+          const comments = await fetchCommentsForChecklist(
+            checklistId,
+            items.map((item) => item.id),
+          )
           const authorEmails = await fetchDisplayNames([
             ...new Set(comments.map((comment) => comment.user_id)),
           ])
@@ -232,7 +264,39 @@ export const useChecklistDetailStore = create<ChecklistDetailState>((set, get) =
       )
       .subscribe()
 
-    set({ channels: [itemsChannel, commentsChannel, checklistChannel, leadNotesChannel] })
+    const attachmentsChannel = supabase
+      .channel(`checklist-attachments-${checklistId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'chkchk_attachments',
+          filter: `checklist_id=eq.${checklistId}`,
+        },
+        async () => {
+          const attachments = await fetchAttachmentsForChecklist(checklistId)
+          const fileUploaderNames = await fetchDisplayNames([
+            ...new Set(
+              attachments
+                .map((file) => file.uploaded_by)
+                .filter((uid): uid is string => Boolean(uid)),
+            ),
+          ])
+          set({ attachments, fileUploaderNames })
+        },
+      )
+      .subscribe()
+
+    set({
+      channels: [
+        itemsChannel,
+        commentsChannel,
+        checklistChannel,
+        leadNotesChannel,
+        attachmentsChannel,
+      ],
+    })
   },
 
   unsubscribe: () => {
@@ -254,7 +318,6 @@ export const useChecklistDetailStore = create<ChecklistDetailState>((set, get) =
 
     try {
       await updateItem(itemId, { completed })
-      // Clear Current when that task is checked done
       if (completed && previousChecklist?.current_item_id === itemId) {
         const updated = await setCurrentItem(previousChecklist.id, null)
         set({ checklist: updated })
@@ -263,7 +326,7 @@ export const useChecklistDetailStore = create<ChecklistDetailState>((set, get) =
       set({
         items: previous,
         checklist: previousChecklist,
-        error: error instanceof Error ? error.message : 'Update failed',
+        error: error instanceof Error ? error.message : 'Failed to update item',
       })
     }
   },
@@ -275,7 +338,7 @@ export const useChecklistDetailStore = create<ChecklistDetailState>((set, get) =
       const updated = await setCurrentItem(checklist.id, itemId)
       set({ checklist: updated })
     } catch (error) {
-      set({ error: error instanceof Error ? error.message : 'Failed to set current task' })
+      set({ error: error instanceof Error ? error.message : 'Failed to set current item' })
     }
   },
 
@@ -332,11 +395,26 @@ export const useChecklistDetailStore = create<ChecklistDetailState>((set, get) =
   },
 
   addComment: async (itemId, userId, text) => {
+    const { checklist } = get()
+    if (!checklist) return
     try {
-      const comment = await createComment(itemId, userId, text)
-      set({ comments: [...get().comments, comment] })
+      const comment = await createComment(itemId, userId, text, checklist.id)
+      set({ comments: [...get().comments, comment], error: null })
     } catch (error) {
       set({ error: error instanceof Error ? error.message : 'Failed to add comment' })
+    }
+  },
+
+  archiveOrder: async () => {
+    const { checklist } = get()
+    if (!checklist) return false
+    try {
+      await confirmCard(checklist.id)
+      set({ checklist: { ...checklist, status: 'archived' }, error: null })
+      return true
+    } catch (error) {
+      set({ error: error instanceof Error ? error.message : 'Could not archive this directive' })
+      return false
     }
   },
 
@@ -428,17 +506,64 @@ export const useChecklistDetailStore = create<ChecklistDetailState>((set, get) =
   },
 
   uploadItemAttachment: async (itemId, userId, file) => {
+    const { checklist } = get()
+    if (!checklist) return
     set({ uploadProgress: 0, error: null })
     try {
-      await uploadAttachment(itemId, userId, file, (percent) => {
-        set({ uploadProgress: percent })
-      })
-      set({ uploadProgress: null })
+      const attachment = await uploadAttachment(
+        itemId,
+        checklist.id,
+        userId,
+        file,
+        (percent) => { set({ uploadProgress: percent }) },
+      )
+      const names = await fetchDisplayNames([userId])
+      set((state) => ({
+        uploadProgress: null,
+        attachments: [attachment, ...state.attachments],
+        fileUploaderNames: { ...state.fileUploaderNames, ...names },
+      }))
     } catch (error) {
       set({
         uploadProgress: null,
         error: error instanceof Error ? error.message : 'Upload failed',
       })
+    }
+  },
+
+  uploadOrderAttachment: async (userId, file) => {
+    const { checklist } = get()
+    if (!checklist) return
+    set({ uploadProgress: 0, error: null })
+    try {
+      const attachment = await uploadOrderFile(
+        checklist.id,
+        userId,
+        file,
+        (percent) => { set({ uploadProgress: percent }) },
+      )
+      const names = await fetchDisplayNames([userId])
+      set((state) => ({
+        uploadProgress: null,
+        attachments: [attachment, ...state.attachments],
+        fileUploaderNames: { ...state.fileUploaderNames, ...names },
+      }))
+    } catch (error) {
+      set({
+        uploadProgress: null,
+        error: error instanceof Error ? error.message : 'Upload failed',
+      })
+    }
+  },
+
+  removeAttachment: async (attachmentId) => {
+    try {
+      await deleteAttachment(attachmentId)
+      set((state) => ({
+        attachments: state.attachments.filter((file) => file.id !== attachmentId),
+      }))
+    } catch (error) {
+      set({ error: error instanceof Error ? error.message : 'Could not remove file' })
     }
   },
 

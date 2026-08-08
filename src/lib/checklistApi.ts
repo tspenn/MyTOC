@@ -2,6 +2,7 @@ import { supabase } from './supabase'
 import { withRetry, isRlsError } from './retry'
 import type {
   Checklist,
+  ChecklistAttachment,
   ChecklistComment,
   ChecklistCollaborator,
   ChecklistItem,
@@ -230,32 +231,72 @@ export async function reorderItems(items: ChecklistItem[]): Promise<void> {
   if (failed?.error) throwIfRls(failed.error)
 }
 
-export async function fetchCommentsForItems(itemIds: string[]): Promise<ChecklistComment[]> {
-  if (itemIds.length === 0) return []
-
-  const { data, error } = await supabase
+export async function fetchCommentsForChecklist(
+  checklistId: string,
+  itemIds: string[],
+): Promise<ChecklistComment[]> {
+  const { data: orderComments, error: orderError } = await supabase
     .from('chkchk_comments')
-    .select('*')
-    .in('item_id', itemIds)
+    .select('id, item_id, checklist_id, user_id, text, created_at')
+    .eq('checklist_id', checklistId)
+    .is('item_id', null)
     .order('created_at', { ascending: true })
 
+  if (orderError) throwIfRls(orderError)
+
+  let taskComments: ChecklistComment[] = []
+  if (itemIds.length > 0) {
+    const { data, error } = await supabase
+      .from('chkchk_comments')
+      .select('id, item_id, checklist_id, user_id, text, created_at')
+      .in('item_id', itemIds)
+      .order('created_at', { ascending: true })
+    if (error) throwIfRls(error)
+    taskComments = (data ?? []) as ChecklistComment[]
+  }
+
+  const merged = [...((orderComments ?? []) as ChecklistComment[]), ...taskComments]
+  merged.sort(
+    (a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime(),
+  )
+  return merged
+}
+
+/** @deprecated use fetchCommentsForChecklist */
+export async function fetchCommentsForItems(itemIds: string[]): Promise<ChecklistComment[]> {
+  if (itemIds.length === 0) return []
+  const { data, error } = await supabase
+    .from('chkchk_comments')
+    .select('id, item_id, checklist_id, user_id, text, created_at')
+    .in('item_id', itemIds)
+    .order('created_at', { ascending: true })
   if (error) throwIfRls(error)
-  return data ?? []
+  return (data ?? []) as ChecklistComment[]
 }
 
 export async function createComment(
-  itemId: string,
+  itemId: string | null,
   userId: string,
   text: string,
+  checklistId?: string,
 ): Promise<ChecklistComment> {
+  if (!itemId && !checklistId) {
+    throw new Error('Pick Whole directive or an item before sending')
+  }
+  const row: Record<string, string | null> = {
+    item_id: itemId,
+    user_id: userId,
+    text,
+    checklist_id: checklistId ?? null,
+  }
   const { data, error } = await supabase
     .from('chkchk_comments')
-    .insert({ item_id: itemId, user_id: userId, text })
-    .select('*')
+    .insert(row)
+    .select('id, item_id, checklist_id, user_id, text, created_at')
     .single()
 
   if (error) throwIfRls(error)
-  return data
+  return data as ChecklistComment
 }
 
 export async function fetchCollaborators(checklistId: string): Promise<CollaboratorProfile[]> {
@@ -342,19 +383,22 @@ export async function removeCollaborator(id: string): Promise<void> {
   if (error) throwIfRls(error)
 }
 
-export async function uploadAttachment(
-  itemId: string,
+const MAX_ATTACHMENT_BYTES = 50 * 1024 * 1024
+
+function assertAttachableFile(file: File) {
+  if (file.size > MAX_ATTACHMENT_BYTES) {
+    throw new Error('File must be 50 MB or smaller.')
+  }
+}
+
+async function storeAttachmentFile(
   userId: string,
+  folderKey: string,
   file: File,
   onProgress?: (percent: number) => void,
 ): Promise<string> {
-  const maxSize = 10 * 1024 * 1024
-  if (file.size > maxSize) {
-    throw new Error('File must be 10 MB or smaller.')
-  }
-
   const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_')
-  const path = `${userId}/${itemId}/${Date.now()}-${safeName}`
+  const path = `${userId}/${folderKey}/${Date.now()}-${safeName}`
 
   onProgress?.(10)
 
@@ -367,19 +411,81 @@ export async function uploadAttachment(
   if (error) throw error
 
   const { data } = supabase.storage.from('chkchk-attachments').getPublicUrl(path)
-  const fileUrl = data.publicUrl
+  return data.publicUrl
+}
 
-  const { error: insertError } = await supabase.from('chkchk_attachments').insert({
-    item_id: itemId,
-    file_url: fileUrl,
-    file_name: file.name,
-    file_size: file.size,
-  })
+export async function uploadAttachment(
+  itemId: string,
+  checklistId: string,
+  userId: string,
+  file: File,
+  onProgress?: (percent: number) => void,
+): Promise<ChecklistAttachment> {
+  assertAttachableFile(file)
+  const fileUrl = await storeAttachmentFile(userId, itemId, file, onProgress)
+
+  const { data, error: insertError } = await supabase
+    .from('chkchk_attachments')
+    .insert({
+      item_id: itemId,
+      checklist_id: checklistId,
+      uploaded_by: userId,
+      file_url: fileUrl,
+      file_name: file.name,
+      file_size: file.size,
+    })
+    .select('id, item_id, checklist_id, uploaded_by, file_url, file_name, file_size, created_at')
+    .single()
 
   onProgress?.(100)
   if (insertError) throwIfRls(insertError)
+  return data as ChecklistAttachment
+}
 
-  return fileUrl
+/** Directive-level file (finished work, invoice, receipt, photo/video) — not tied to one item. */
+export async function uploadOrderFile(
+  checklistId: string,
+  userId: string,
+  file: File,
+  onProgress?: (percent: number) => void,
+): Promise<ChecklistAttachment> {
+  assertAttachableFile(file)
+  const fileUrl = await storeAttachmentFile(userId, checklistId, file, onProgress)
+
+  const { data, error: insertError } = await supabase
+    .from('chkchk_attachments')
+    .insert({
+      item_id: null,
+      checklist_id: checklistId,
+      uploaded_by: userId,
+      file_url: fileUrl,
+      file_name: file.name,
+      file_size: file.size,
+    })
+    .select('id, item_id, checklist_id, uploaded_by, file_url, file_name, file_size, created_at')
+    .single()
+
+  onProgress?.(100)
+  if (insertError) throwIfRls(insertError)
+  return data as ChecklistAttachment
+}
+
+export async function fetchAttachmentsForChecklist(
+  checklistId: string,
+): Promise<ChecklistAttachment[]> {
+  const { data, error } = await supabase
+    .from('chkchk_attachments')
+    .select('id, item_id, checklist_id, uploaded_by, file_url, file_name, file_size, created_at')
+    .eq('checklist_id', checklistId)
+    .order('created_at', { ascending: false })
+
+  if (error) throw error
+  return (data ?? []) as ChecklistAttachment[]
+}
+
+export async function deleteAttachment(attachmentId: string): Promise<void> {
+  const { error } = await supabase.from('chkchk_attachments').delete().eq('id', attachmentId)
+  if (error) throwIfRls(error)
 }
 
 export async function fetchUserEmails(userIds: string[]): Promise<Record<string, string>> {

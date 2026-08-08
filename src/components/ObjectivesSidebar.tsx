@@ -1,6 +1,19 @@
 import { FormEvent, useEffect, useMemo, useState } from 'react'
 import clsx from 'clsx'
-import type { ChecklistItem } from '../lib/types'
+import FileThumb from './FileThumb'
+import { downloadWorkFile } from '../lib/downloadFile'
+import type { ChecklistAttachment, ChecklistItem } from '../lib/types'
+
+const FILE_ACCEPT =
+  'image/*,video/*,.pdf,.doc,.docx,.xls,.xlsx,.csv,.txt,.zip,.heic,.webp'
+
+function isImage(name: string, url: string): boolean {
+  return /\.(png|jpe?g|gif|webp|heic|bmp|svg)$/i.test(name) || url.includes('image')
+}
+
+function isVideo(name: string): boolean {
+  return /\.(mp4|mov|webm|m4v|avi)$/i.test(name)
+}
 
 /** Local-state input so typing never triggers an API call mid-keystroke */
 function TaskInput({
@@ -50,6 +63,7 @@ interface ObjectivesSidebarProps {
   /** When true, opening a task card marks it Current for the Lead. */
   isAssignee: boolean
   currentItemId: string | null
+  attachments: ChecklistAttachment[]
   onToggle: (itemId: string, completed: boolean) => void
   onTaskChange: (itemId: string, task: string) => void
   onDelete: (itemId: string) => void
@@ -57,6 +71,7 @@ interface ObjectivesSidebarProps {
   onReorder: (items: ChecklistItem[]) => void
   onSetCurrent: (itemId: string) => void
   onUpload: (itemId: string, file: File) => void
+  onDeleteAttachment: (attachmentId: string) => void
   uploadProgress: number | null
   mobileOpen: boolean
   onCloseMobile: () => void
@@ -68,6 +83,7 @@ export default function ObjectivesSidebar({
   canToggle,
   isAssignee,
   currentItemId,
+  attachments,
   onToggle,
   onTaskChange,
   onDelete,
@@ -75,6 +91,7 @@ export default function ObjectivesSidebar({
   onReorder,
   onSetCurrent,
   onUpload,
+  onDeleteAttachment,
   uploadProgress,
   mobileOpen,
   onCloseMobile,
@@ -181,6 +198,8 @@ export default function ObjectivesSidebar({
             const isExpanded = expandedId === item.id
             const isCurrent = currentItemId === item.id && !item.completed
             const canEditDetails = canEdit && !item.completed
+            const canUploadFiles = canEdit || isAssignee
+            const itemFiles = attachments.filter((file) => file.item_id === item.id)
             const canDrag = canEdit && !isCurrent && !item.completed
             const toggleAllowed = canToggleItem(index, item.completed)
             const lockedAhead = !item.completed && firstIncompleteIndex >= 0 && index > firstIncompleteIndex
@@ -250,12 +269,16 @@ export default function ObjectivesSidebar({
                     <span className="objective-chevron" aria-hidden="true">{isExpanded ? '▾' : '▸'}</span>
                   </button>
 
-                  {canEditDetails && (
-                    <div className="objective-actions">
-                      <label className="btn btn-secondary btn-sm file-upload-btn" title="Attach file">
+                  <div className="objective-actions">
+                    {canUploadFiles && (
+                      <label className="btn btn-secondary btn-sm file-upload-btn" title="Attach file to this item">
                         📎
+                        {itemFiles.length > 0 && (
+                          <span className="file-count-badge">{itemFiles.length}</span>
+                        )}
                         <input
                           type="file"
+                          accept={FILE_ACCEPT}
                           hidden
                           onChange={(event) => {
                             const file = event.target.files?.[0]
@@ -264,6 +287,8 @@ export default function ObjectivesSidebar({
                           }}
                         />
                       </label>
+                    )}
+                    {canEditDetails && (
                       <button
                         type="button"
                         className="btn btn-secondary btn-sm"
@@ -272,8 +297,8 @@ export default function ObjectivesSidebar({
                       >
                         ✕
                       </button>
-                    </div>
-                  )}
+                    )}
+                  </div>
                 </div>
 
                 {isExpanded && (
@@ -281,7 +306,7 @@ export default function ObjectivesSidebar({
                     {canEditDetails ? (
                       <>
                         <p className="objective-card-hint">
-                          Edit item details before team members mark this done. Attach files here if needed.
+                          Edit item details before it is marked done. Attach files with 📎.
                         </p>
                         <TaskInput
                           task={item.task}
@@ -295,7 +320,7 @@ export default function ObjectivesSidebar({
                         <p className="objective-card-body">{item.task}</p>
                         {item.completed ? (
                           <p className="objective-card-locked">
-                            Done — item details are locked. Discuss changes in Messages.
+                            Done — item details are locked. You can still add files or use Messages.
                           </p>
                         ) : lockedAhead ? (
                           <p className="objective-card-locked">
@@ -303,11 +328,59 @@ export default function ObjectivesSidebar({
                           </p>
                         ) : (
                           <p className="objective-card-locked">
-                            Only the Lead can edit item details. Use Messages for questions or updates.
+                            Only the Lead can edit item details. Attach files with 📎 or use Messages.
                           </p>
                         )}
                       </>
                     )}
+
+                    {(itemFiles.length > 0 || canUploadFiles) && (
+                      <div className="objective-files">
+                        <p className="objective-files-label">Files on this item</p>
+                        {itemFiles.length === 0 ? (
+                          <p className="muted-text small-text">No files yet.</p>
+                        ) : (
+                          <ul className="objective-files-list">
+                            {itemFiles.map((file) => (
+                              <li key={file.id}>
+                                <div className="objective-file-preview">
+                                  <FileThumb
+                                    fileName={file.file_name}
+                                    fileUrl={file.file_url}
+                                    isImage={isImage(file.file_name, file.file_url)}
+                                    isVideo={isVideo(file.file_name)}
+                                  />
+                                </div>
+                                <a href={file.file_url} target="_blank" rel="noreferrer">
+                                  {file.file_name}
+                                </a>
+                                <div className="objective-files-actions">
+                                  <button
+                                    type="button"
+                                    className="btn btn-primary btn-sm"
+                                    onClick={() => {
+                                      void downloadWorkFile(file.file_url, file.file_name)
+                                    }}
+                                  >
+                                    Download
+                                  </button>
+                                  {(canEdit || isAssignee) && (
+                                    <button
+                                      type="button"
+                                      className="btn btn-secondary btn-sm"
+                                      onClick={() => onDeleteAttachment(file.id)}
+                                    >
+                                      Remove
+                                    </button>
+                                  )}
+                                </div>
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                      </div>
+                    )}
+
                     <button
                       type="button"
                       className="btn btn-secondary btn-sm objective-card-close"

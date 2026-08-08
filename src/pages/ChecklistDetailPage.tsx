@@ -4,6 +4,7 @@ import Alert from '../components/Alert'
 import LeadNotesPanel from '../components/LeadNotesPanel'
 import MessagesPanel from '../components/MessagesPanel'
 import ObjectivesSidebar from '../components/ObjectivesSidebar'
+import OrderFilesPanel from '../components/OrderFilesPanel'
 import SettingsModal from '../components/SettingsModal'
 import ShareModal from '../components/ShareModal'
 import { useAuth } from '../hooks/useAuth'
@@ -25,46 +26,52 @@ export default function ChecklistDetailPage() {
   const [shareOpen,    setShareOpen]    = useState(searchParams.get('share') === '1')
   const [sidebarOpen,  setSidebarOpen]  = useState(false)
   const [completing,   setCompleting]   = useState(false)
+  const [archiving,    setArchiving]    = useState(false)
 
-  const checklist        = useChecklistDetailStore((state) => state.checklist)
-  const items            = useChecklistDetailStore((state) => state.items)
-  const comments         = useChecklistDetailStore((state) => state.comments)
-  const leadNotes        = useChecklistDetailStore((state) => state.leadNotes)
-  const leadNoteAuthors  = useChecklistDetailStore((state) => state.leadNoteAuthors)
-  const collaborators    = useChecklistDetailStore((state) => state.collaborators)
-  const navigationIds    = useChecklistDetailStore((state) => state.navigationIds)
-  const authorEmails     = useChecklistDetailStore((state) => state.authorEmails)
-  const loading          = useChecklistDetailStore((state) => state.loading)
-  const accessDenied     = useChecklistDetailStore((state) => state.accessDenied)
-  const error            = useChecklistDetailStore((state) => state.error)
-  const uploadProgress   = useChecklistDetailStore((state) => state.uploadProgress)
+  const checklist         = useChecklistDetailStore((state) => state.checklist)
+  const items             = useChecklistDetailStore((state) => state.items)
+  const comments          = useChecklistDetailStore((state) => state.comments)
+  const leadNotes         = useChecklistDetailStore((state) => state.leadNotes)
+  const leadNoteAuthors   = useChecklistDetailStore((state) => state.leadNoteAuthors)
+  const attachments       = useChecklistDetailStore((state) => state.attachments)
+  const fileUploaderNames = useChecklistDetailStore((state) => state.fileUploaderNames)
+  const collaborators     = useChecklistDetailStore((state) => state.collaborators)
+  const navigationIds     = useChecklistDetailStore((state) => state.navigationIds)
+  const authorEmails      = useChecklistDetailStore((state) => state.authorEmails)
+  const loading           = useChecklistDetailStore((state) => state.loading)
+  const accessDenied      = useChecklistDetailStore((state) => state.accessDenied)
+  const error             = useChecklistDetailStore((state) => state.error)
+  const uploadProgress    = useChecklistDetailStore((state) => state.uploadProgress)
 
-  const loadChecklist            = useChecklistDetailStore((state) => state.loadChecklist)
-  const subscribe                = useChecklistDetailStore((state) => state.subscribe)
-  const reset                    = useChecklistDetailStore((state) => state.reset)
-  const toggleItem               = useChecklistDetailStore((state) => state.toggleItem)
-  const updateItemTask           = useChecklistDetailStore((state) => state.updateItemTask)
-  const addItem                  = useChecklistDetailStore((state) => state.addItem)
-  const removeItem               = useChecklistDetailStore((state) => state.removeItem)
-  const reorderLocalItems        = useChecklistDetailStore((state) => state.reorderLocalItems)
-  const markItemCurrent          = useChecklistDetailStore((state) => state.markItemCurrent)
-  const addComment               = useChecklistDetailStore((state) => state.addComment)
-  const addLeadNote                = useChecklistDetailStore((state) => state.addLeadNote)
-  const saveSettings             = useChecklistDetailStore((state) => state.saveSettings)
-  const deleteCurrentChecklist   = useChecklistDetailStore((state) => state.deleteCurrentChecklist)
+  const loadChecklist             = useChecklistDetailStore((state) => state.loadChecklist)
+  const subscribe                 = useChecklistDetailStore((state) => state.subscribe)
+  const reset                     = useChecklistDetailStore((state) => state.reset)
+  const toggleItem                = useChecklistDetailStore((state) => state.toggleItem)
+  const updateItemTask            = useChecklistDetailStore((state) => state.updateItemTask)
+  const addItem                   = useChecklistDetailStore((state) => state.addItem)
+  const removeItem                = useChecklistDetailStore((state) => state.removeItem)
+  const reorderLocalItems         = useChecklistDetailStore((state) => state.reorderLocalItems)
+  const markItemCurrent           = useChecklistDetailStore((state) => state.markItemCurrent)
+  const addComment                = useChecklistDetailStore((state) => state.addComment)
+  const addLeadNote               = useChecklistDetailStore((state) => state.addLeadNote)
+  const saveSettings              = useChecklistDetailStore((state) => state.saveSettings)
+  const deleteCurrentChecklist    = useChecklistDetailStore((state) => state.deleteCurrentChecklist)
   const inviteCollaboratorByEmail = useChecklistDetailStore((state) => state.inviteCollaboratorByEmail)
-  const inviteRosterMemberBySlot = useChecklistDetailStore((state) => state.inviteRosterMemberBySlot)
-  const removeCollaboratorById   = useChecklistDetailStore((state) => state.removeCollaboratorById)
-  const uploadItemAttachment     = useChecklistDetailStore((state) => state.uploadItemAttachment)
-  const markComplete             = useChecklistDetailStore((state) => state.markComplete)
+  const inviteRosterMemberBySlot  = useChecklistDetailStore((state) => state.inviteRosterMemberBySlot)
+  const removeCollaboratorById    = useChecklistDetailStore((state) => state.removeCollaboratorById)
+  const uploadItemAttachment      = useChecklistDetailStore((state) => state.uploadItemAttachment)
+  const uploadOrderAttachment     = useChecklistDetailStore((state) => state.uploadOrderAttachment)
+  const removeAttachment          = useChecklistDetailStore((state) => state.removeAttachment)
+  const markComplete              = useChecklistDetailStore((state) => state.markComplete)
+  const archiveOrder              = useChecklistDetailStore((state) => state.archiveOrder)
 
-  const isOwner       = checklist?.user_id === user?.id
+  const isOwner = checklist?.user_id === user?.id
   const isCardAssignee = useMemo(() => {
     if (!user || !checklist) return false
     return collaborators.some((c) => c.user_id === user.id && c.role === 'assignee')
   }, [user, checklist, collaborators])
 
-  const canEdit   = useMemo(() => {
+  const canEdit = useMemo(() => {
     if (!user || !checklist) return false
     if (checklist.user_id === user.id) return true
     if (isLead && checklist.team_id) return true
@@ -72,13 +79,13 @@ export default function ChecklistDetailPage() {
   }, [user, checklist, collaborators, isLead])
 
   const canViewLeadNotes = isLead && !!checklist?.team_id
-
-  const canToggle  = canEdit || isCardAssignee
+  const canToggle = canEdit || isCardAssignee
   const canComment = canEdit || isCardAssignee
+  const canUploadFiles = canEdit || isCardAssignee
 
   const currentIndex = id ? navigationIds.indexOf(id) : -1
-  const previousId   = currentIndex > 0 ? navigationIds[currentIndex - 1] : null
-  const nextId       = currentIndex >= 0 && currentIndex < navigationIds.length - 1
+  const previousId = currentIndex > 0 ? navigationIds[currentIndex - 1] : null
+  const nextId = currentIndex >= 0 && currentIndex < navigationIds.length - 1
     ? navigationIds[currentIndex + 1] : null
 
   useEffect(() => {
@@ -103,8 +110,19 @@ export default function ChecklistDetailPage() {
     setCompleting(false)
   }
 
-  const backLink  = isCrew ? '/my-cards' : '/dashboard'
+  async function handleArchive() {
+    if (!window.confirm('Archive this directive? It will move to Confirmed and leave Active.')) return
+    setArchiving(true)
+    const ok = await archiveOrder()
+    setArchiving(false)
+    if (ok) navigate(isCrew ? '/my-cards?done=1' : '/dashboard?tab=archived')
+  }
+
+  const backLink = isCrew ? '/my-cards' : '/dashboard'
   const backLabel = isCrew ? '← My Directives' : '← Command view'
+  const doneCount = items.filter((item) => item.completed).length
+  const totalCount = items.length
+  const itemsLabel = totalCount > 0 ? `📋 Items · ${doneCount}/${totalCount}` : '📋 Items'
 
   if (!id) return <p className="muted-text">Directive not found.</p>
   if (loading) return (
@@ -145,7 +163,7 @@ export default function ChecklistDetailPage() {
             className="btn btn-secondary btn-sm mobile-only"
             onClick={() => setSidebarOpen(true)}
           >
-            📋 Items
+            {itemsLabel}
           </button>
 
           {isCardAssignee && checklist.status === 'active' && (
@@ -159,7 +177,7 @@ export default function ChecklistDetailPage() {
             </button>
           )}
 
-          {isOwner && (
+          {(isOwner || canEdit) && (
             <button type="button" className="btn btn-secondary btn-sm" onClick={() => setShareOpen(true)}>
               Assign
             </button>
@@ -167,6 +185,17 @@ export default function ChecklistDetailPage() {
           {canEdit && (
             <button type="button" className="btn btn-secondary btn-sm" onClick={() => setSettingsOpen(true)}>
               Details
+            </button>
+          )}
+          {canEdit && checklist.status !== 'archived' && (
+            <button
+              type="button"
+              className="btn btn-secondary btn-sm"
+              disabled={archiving}
+              title="Close out this directive and move it to Confirmed"
+              onClick={() => void handleArchive()}
+            >
+              {archiving ? 'Archiving…' : '📁 Archive'}
             </button>
           )}
 
@@ -192,6 +221,7 @@ export default function ChecklistDetailPage() {
           canToggle={canToggle}
           isAssignee={isCardAssignee}
           currentItemId={checklist.current_item_id ?? null}
+          attachments={attachments}
           onToggle={(itemId, completed) => void toggleItem(itemId, completed)}
           onTaskChange={(itemId, task) => void updateItemTask(itemId, task)}
           onDelete={(itemId) => void removeItem(itemId)}
@@ -201,6 +231,7 @@ export default function ChecklistDetailPage() {
           onUpload={(itemId, file) => {
             if (user) void uploadItemAttachment(itemId, user.id, file)
           }}
+          onDeleteAttachment={(attachmentId) => void removeAttachment(attachmentId)}
           uploadProgress={uploadProgress}
           mobileOpen={sidebarOpen}
           onCloseMobile={() => setSidebarOpen(false)}
@@ -216,6 +247,19 @@ export default function ChecklistDetailPage() {
           onAddComment={(itemId, text) => {
             if (user) void addComment(itemId, user.id, text)
           }}
+        />
+
+        <OrderFilesPanel
+          files={attachments}
+          canUpload={canUploadFiles}
+          currentUserId={user?.id ?? ''}
+          canDeleteAny={canEdit}
+          uploaderNames={fileUploaderNames}
+          uploadProgress={uploadProgress}
+          onUpload={(file) => {
+            if (user) void uploadOrderAttachment(user.id, file)
+          }}
+          onDelete={(fileId) => void removeAttachment(fileId)}
         />
 
         {canViewLeadNotes && (
