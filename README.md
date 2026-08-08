@@ -1,8 +1,8 @@
-# TOC — Tactical Operations Center
+# MyTOC — Tactical Operations Center
 
 Operations command center for COOs and C-Suite leaders. Built with Vite, React, TypeScript, and Supabase.
 
-**Site:** [mytoc-eta.vercel.app](https://mytoc-eta.vercel.app) (custom domain TOC.app)
+**Site:** [mytoc.app](https://mytoc.app) (Vercel: mytoc-eta.vercel.app)
 
 ## Setup
 
@@ -34,4 +34,4 @@ pnpm run build
 pnpm dlx vercel --prod
 ```
 
-Set `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` in Vercel.
+Set `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` in Vercel. Point **mytoc.app** at the Vercel project and update Supabase Auth Site URL / redirect allow-list.

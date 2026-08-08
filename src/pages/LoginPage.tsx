@@ -103,7 +103,7 @@ export default function LoginPage() {
     return (
       <AuthLayout
         title="Team member sign in"
-        subtitle="TOC team mode — use the Lead ID and worker number your Lead gave you."
+        subtitle="MyTOC team mode — use the Lead ID and worker number your Lead gave you."
         footerText="Lead or co-lead with email?"
         footerLinkText="Email sign in"
         footerLinkTo="/login"
@@ -149,7 +149,7 @@ export default function LoginPage() {
   return (
     <AuthLayout
       title="Welcome back"
-      subtitle="Sign in to your TOC command center."
+      subtitle="Sign in to your MyTOC command center."
       footerText="Don't have an account?"
       footerLinkText="Sign up as Lead"
       footerLinkTo="/signup"
