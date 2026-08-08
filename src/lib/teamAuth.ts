@@ -23,7 +23,7 @@ export function teamSignupUrl(leadCode: string, workerNumber: string): string {
 export function teamInviteSms(leadCode: string, workerNumber: string, memberName: string): string {
   const link = teamSignupUrl(leadCode, workerNumber)
   return [
-    `Hi ${memberName}! Join my MyTOC team:`,
+    `Hi ${memberName}! Join my TOC team:`,
     link,
     `Lead ID: ${leadCode.trim()}`,
     `Your #: ${workerNumber.trim()}`,
@@ -33,7 +33,7 @@ export function teamInviteSms(leadCode: string, workerNumber: string, memberName
 
 /** Opens the Lead's own email app with invite pre-filled (not app-sent email). */
 export function teamInviteMailto(leadCode: string, workerNumber: string, memberName: string): string {
-  const subject = encodeURIComponent(`Join my MyTOC team — ${memberName}`)
+  const subject = encodeURIComponent(`Join my TOC team — ${memberName}`)
   const body = encodeURIComponent(teamInviteSms(leadCode, workerNumber, memberName))
   return `mailto:?subject=${subject}&body=${body}`
 }

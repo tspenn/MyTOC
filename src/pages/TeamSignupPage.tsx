@@ -80,7 +80,7 @@ export default function TeamSignupPage() {
 
   return (
     <AuthLayout
-      title="Join MyTOC"
+      title="Join TOC"
       subtitle="Use the Lead ID and worker number your Lead texted you."
       footerText="Already signed up?"
       footerLinkText="Sign in as team member"

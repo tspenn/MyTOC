@@ -109,7 +109,7 @@ export default function SettingsPage() {
               <h2>For Team Members</h2>
               <ol>
                 <li>Sign up with your Lead&apos;s invite link and worker number — not the public signup page.</li>
-                <li>Install MyTOC on your phone (see below), then turn on <strong>Notifications</strong> in Profile.</li>
+                <li>Install TOC on your phone (see below), then turn on <strong>Notifications</strong> in Profile.</li>
                 <li>Open <strong>My Directives</strong> when your Lead assigns a directive.</li>
                 <li>Work items top to bottom — mark one done to unlock the next.</li>
                 <li>Open an item to mark it <strong>Current</strong> (your Lead sees that pill) and read details/files.</li>

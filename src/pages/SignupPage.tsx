@@ -122,7 +122,7 @@ export default function SignupPage() {
 
   return (
     <AuthLayout
-      title={coLeadToken ? 'Join as co-Lead' : 'Join MyTOC'}
+      title={coLeadToken ? 'Join as co-Lead' : 'Join TOC'}
       subtitle={
         coLeadToken
           ? 'Create your Lead account to share the same board.'

@@ -1,6 +1,6 @@
-/* MyTOC service worker — offline shell + Web Push */
+/* TOC service worker — offline shell + Web Push */
 
-const CACHE_NAME = 'mytoc-v1'
+const CACHE_NAME = 'toc-v1'
 const SHELL_FILES = [
   '/',
   '/index.html',
@@ -40,14 +40,14 @@ self.addEventListener('fetch', (event) => {
 })
 
 self.addEventListener('push', (event) => {
-  let payload = { title: 'MyTOC', body: 'You have a new update.', url: '/' }
+  let payload = { title: 'TOC', body: 'You have a new update.', url: '/' }
   try {
     if (event.data) payload = { ...payload, ...event.data.json() }
   } catch {
     // keep defaults
   }
   event.waitUntil(
-    self.registration.showNotification(payload.title || 'MyTOC', {
+    self.registration.showNotification(payload.title || 'TOC', {
       body: payload.body || '',
       data: { url: payload.url || '/' },
       icon: '/favicon.jpg',

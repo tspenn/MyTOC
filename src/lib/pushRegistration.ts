@@ -1,5 +1,5 @@
 /**
- * MyTOC Web Push ("notifications" / Ping) — not SMS/Twilio.
+ * TOC Web Push ("notifications" / Ping) — not SMS/Twilio.
  * Subscriptions use shared user_push_subscriptions with app_id = chkchk (legacy backend id).
  */
 import { supabase } from './supabase'

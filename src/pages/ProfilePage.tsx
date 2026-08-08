@@ -73,7 +73,7 @@ export default function ProfilePage() {
           setPushEnabled(true)
         } else if (result === 'denied') {
           setPushEnabled(false)
-          setPushError('Notification permission is blocked — open your browser or device settings and allow notifications for MyTOC.')
+          setPushError('Notification permission is blocked — open your browser or device settings and allow notifications for TOC.')
         } else {
           setPushEnabled(false)
           setPushError('Could not enable notifications. Try again or reinstall the app.')
@@ -258,7 +258,7 @@ export default function ProfilePage() {
       <div className="profile-section">
         <h2>Notifications</h2>
         <p className="muted-text">
-          Get a ping when you are assigned to a directive. Install MyTOC on each phone or computer you want
+          Get a ping when you are assigned to a directive. Install TOC on each phone or computer you want
           pinged, then turn notifications on here. Step-by-step install help is in{' '}
           <Link to="/settings">Settings → How to use</Link>.
         </p>

@@ -5,7 +5,7 @@ interface ConfigErrorPageProps {
 export default function ConfigErrorPage({ issues }: ConfigErrorPageProps) {
   return (
     <main className="config-error-page">
-      <h1>MyTOC configuration error</h1>
+      <h1>TOC configuration error</h1>
       <p>
         This deployment was built with invalid Supabase environment variables.
         Fix them in Vercel, then trigger a new deployment.

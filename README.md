@@ -1,8 +1,8 @@
-# Tactical Operations Center (MyTOC)
+# TOC — Tactical Operations Center
 
 Operations command center for COOs and C-Suite leaders. Built with Vite, React, TypeScript, and Supabase.
 
-**Site:** [mytoc-eta.vercel.app](https://mytoc-eta.vercel.app) (custom domain MyTOC.app later)
+**Site:** [mytoc-eta.vercel.app](https://mytoc-eta.vercel.app) (custom domain TOC.app)
 
 ## Setup
 
@@ -13,48 +13,25 @@ Operations command center for COOs and C-Suite leaders. Built with Vite, React, 
 ## Routes
 
 - `/login` — Sign in
-- `/signup` — Create account
-- `/dashboard` — owned checklists with real-time sync
-- `/checklist/:id` — objectives, messages, settings, sharing
-- `/profile` — account settings
+- `/signup` — Create Lead account
+- `/team-signup` — Team Member invite signup
+- `/dashboard` — Lead command view
+- `/my-cards` — Team Member directives
+- `/checklist/:id` — items, messages, files, assign
+- `/settings` — How to use, Team, Upgrade
+- `/profile` — account & notifications
 
 ## Database
 
-Schema migrations remain under the legacy `chkchk_*` table/RPC names (shared Supabase project):
-
-- `supabase/migrations/20260713192100_create_chkchk_schema.sql`
-- `supabase/migrations/20260713200000_chkchk_invite_helpers.sql`
+Schema migrations remain under the legacy `chkchk_*` table/RPC names (shared Supabase project).
 
 Apply new migrations via Supabase dashboard SQL or MCP.
-
-## Artwork
-
-Place brand assets in `public/`:
-
-- `icon-192.png`, `icon-512.png` — PWA / favicon
-- Optional hero/banner images as you replace placeholders in the UI
 
 ## Vercel deployment
 
 ```bash
 pnpm run build
-pnpm dlx vercel login
 pnpm dlx vercel --prod
 ```
 
 Set `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` in Vercel.
-
-## Scripts
-
-- `pnpm dev` — Start development server
-- `pnpm build` — Production build
-- `pnpm preview` — Preview production build
-- `pnpm lint` — Run ESLint
-
-## Account deletion
-
-Calls the `delete-account-chkchk` Edge Function (backend name unchanged):
-
-```bash
-supabase functions deploy delete-account-chkchk --project-ref psbdjnqcjpxapypcfigx
-```
