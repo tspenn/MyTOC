@@ -41,7 +41,8 @@ export default function LandingPage() {
             <span className="hero-accent">Command.</span>
           </h1>
           <p className="hero-sub">
-            Your personal Tactical Operations Center—giving you the global oversight and totality of presence needed to run daily operations effortlessly.
+            Your Tactical Command Center — everything at your fingertips, wherever you go.
+            Keeping you on top of the game when every moment counts. Tick Tock.
           </p>
           <div className="hero-ctas">
             <Link to="/signup" className="btn btn-gold btn-lg">
