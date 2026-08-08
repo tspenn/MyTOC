@@ -34,14 +34,13 @@ export default function LandingPage() {
         />
         <div className="hero-scrim" aria-hidden="true" />
         <div className="hero-content">
-          <p className="hero-brand-text">MyTOC</p>
           <div className="hero-badge">Executive Command Platform</div>
           <h1 className="hero-title">
-            Complete Operational<br />
+            Tactical Operations<br />
             <span className="hero-accent">Command.</span>
           </h1>
           <p className="hero-sub">
-            Your Tactical Operations Command — everything at your fingertips, wherever you go.
+            Your complete operational command! Everything at your fingertips, wherever you go.
             Keeping you on top of the game when every moment counts. Tick Tock.
           </p>
           <div className="hero-ctas">
@@ -66,7 +65,7 @@ export default function LandingPage() {
           <div className="how-step">
             <span className="how-number">2</span>
             <h3>Assign ownership</h3>
-            <p>Your team member gets a push (notifications on). They open MyTOC and see exactly what&apos;s needed.</p>
+            <p>Your team member gets a push (notifications on). They open TOC and see exactly what&apos;s needed.</p>
           </div>
           <div className="how-divider">→</div>
           <div className="how-step">
@@ -84,7 +83,7 @@ export default function LandingPage() {
           <div className="trust-content">
             <h2>Your data is safe with us.</h2>
             <p>
-              MyTOC is built on{' '}
+              TOC is built on{' '}
               <a
                 href="https://supabase.com"
                 target="_blank"
@@ -189,10 +188,14 @@ export default function LandingPage() {
       {/* ── Footer ─────────────────────────────────────── */}
       <footer className="landing-footer">
         <div className="footer-brand">
-          <img src="/Logo.jpg" alt="MyTOC" className="footer-logo-img" />
+          <img src="/Logo.jpg" alt="TOC" className="footer-logo-img" />
           <span className="footer-logo">Tactical Operations Command</span>
         </div>
-        <p className="footer-copy">MyTOC.app © {new Date().getFullYear()} Skyland Publishing for Skyland Reach LLC</p>
+        <p className="footer-copy">
+          Get it today at{' '}
+          <a href="https://mytoc.app" className="footer-promo-link">MyTOC.app</a>
+          {' '}© {new Date().getFullYear()} Skyland Publishing for Skyland Reach LLC
+        </p>
         <nav className="footer-nav">
           <Link to="/login">Log in</Link>
           <Link to="/signup">Sign up</Link>

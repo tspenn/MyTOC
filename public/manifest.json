@@ -1,6 +1,6 @@
 {
   "name": "Tactical Operations Command",
-  "short_name": "MyTOC",
+  "short_name": "TOC",
   "description": "Operations command center for COOs and executive teams.",
   "start_url": "/",
   "scope": "/",

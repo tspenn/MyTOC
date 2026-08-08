@@ -1527,9 +1527,9 @@ a:hover { text-decoration: underline; color: var(--violet); }
 }
 .hero-title {
   margin: 0 0 1rem;
-  font-size: clamp(2.5rem, 6vw, 4rem);
+  font-size: clamp(2.6rem, 7vw, 4.25rem);
   font-weight: 900;
-  line-height: 1.1;
+  line-height: 1.05;
   color: #eef0f4;
   letter-spacing: -0.03em;
   text-shadow: 0 2px 24px rgba(0, 0, 0, 0.55);
@@ -2146,6 +2146,12 @@ a:hover { text-decoration: underline; color: var(--violet); }
 .footer-logo-img { height: 36px; width: auto; object-fit: contain; mix-blend-mode: screen; }
 .footer-logo { font-size: 1.1rem; font-weight: 800; color: var(--gold); }
 .footer-copy { color: #6b7280; font-size: 0.8rem; margin: 0; }
+.footer-promo-link {
+  color: var(--gold);
+  font-weight: 700;
+  text-decoration: none;
+}
+.footer-promo-link:hover { color: var(--gold-light); text-decoration: underline; }
 .footer-nav { display: flex; gap: 1.25rem; }
 .footer-nav a { color: var(--muted); font-size: 0.875rem; }
 .footer-nav a:hover { color: var(--muted-soft); text-decoration: none; }
