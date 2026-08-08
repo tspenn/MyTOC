@@ -24,15 +24,20 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
     }
 
     async function initSession() {
-      const { data: { session } } = await supabase.auth.getSession().catch(() => ({ data: { session: null } }))
-      if (!mounted) return
-      setAuth(session)
+      try {
+        const { data: { session } } = await supabase.auth.getSession()
+        if (!mounted) return
+        setAuth(session)
 
-      if (session) {
-        await applyRole()
+        if (session) {
+          await applyRole()
+        }
+      } catch (err) {
+        console.warn('Auth session init failed:', err)
+        if (mounted) setAuth(null)
+      } finally {
+        if (mounted) setInitialized(true)
       }
-
-      setInitialized(true)
     }
 
     void initSession()

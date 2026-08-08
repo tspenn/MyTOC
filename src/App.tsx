@@ -17,7 +17,9 @@ import { useAuth } from './hooks/useAuth'
 
 function HomeRedirect() {
   const { isAuthenticated, isTeamMember, initialized } = useAuth()
-  if (!initialized) return null
+  if (!initialized) {
+    return <p className="loading-screen muted-text">Loading…</p>
+  }
   if (!isAuthenticated) return <Navigate to="/home" replace />
   return <Navigate to={isTeamMember ? '/my-cards' : '/dashboard'} replace />
 }
