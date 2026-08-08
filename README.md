@@ -1,6 +1,6 @@
-# MyTOC — Tactical Operations Center
+# MyTOC — Tactical Operations Command
 
-Operations command center for COOs and C-Suite leaders. Built with Vite, React, TypeScript, and Supabase.
+Operations command for COOs and C-Suite leaders. Built with Vite, React, TypeScript, and Supabase.
 
 **Site:** [mytoc.app](https://mytoc.app) (Vercel: mytoc-eta.vercel.app)
 

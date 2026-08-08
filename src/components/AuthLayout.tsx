@@ -21,7 +21,7 @@ export default function AuthLayout({
     <div className="auth-page">
       <div className="auth-card">
         <div className="auth-card-header">
-          <Link to="/" className="auth-brand" title="Tactical Operations Center">
+          <Link to="/" className="auth-brand" title="Tactical Operations Command">
             <img src="/Logo.jpg" alt="MyTOC" className="auth-brand-logo" />
           </Link>
           <h1>{title}</h1>

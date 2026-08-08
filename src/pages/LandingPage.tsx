@@ -41,7 +41,7 @@ export default function LandingPage() {
             <span className="hero-accent">Command.</span>
           </h1>
           <p className="hero-sub">
-            Your Tactical Command Center — everything at your fingertips, wherever you go.
+            Your Tactical Operations Command — everything at your fingertips, wherever you go.
             Keeping you on top of the game when every moment counts. Tick Tock.
           </p>
           <div className="hero-ctas">
@@ -190,7 +190,7 @@ export default function LandingPage() {
       <footer className="landing-footer">
         <div className="footer-brand">
           <img src="/Logo.jpg" alt="MyTOC" className="footer-logo-img" />
-          <span className="footer-logo">Tactical Operations Center</span>
+          <span className="footer-logo">Tactical Operations Command</span>
         </div>
         <p className="footer-copy">MyTOC.app © {new Date().getFullYear()} Skyland Publishing for Skyland Reach LLC</p>
         <nav className="footer-nav">
