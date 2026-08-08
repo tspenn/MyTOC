@@ -1594,6 +1594,31 @@ a:hover { text-decoration: underline; color: var(--violet); }
   font-size: 1rem;
 }
 
+.landing-video {
+  max-width: 56rem;
+}
+.landing-video .section-title {
+  margin-bottom: 1.75rem;
+}
+.landing-video-frame {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #0a0e14;
+  border: 1px solid rgba(212, 175, 55, 0.28);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.45);
+}
+.landing-video-embed {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  display: block;
+}
+
 .how-it-works {
   display: flex;
   align-items: flex-start;

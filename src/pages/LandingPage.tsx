@@ -77,6 +77,22 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* ── Promo video ────────────────────────────────── */}
+      <section className="landing-section landing-video">
+        <h2 className="section-title">See TOC in action</h2>
+        <div className="landing-video-frame">
+          <iframe
+            className="landing-video-embed"
+            src="https://www.youtube.com/embed/_vzB73XVNa8"
+            title="Tactical Operations Command"
+            loading="lazy"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            allowFullScreen
+            referrerPolicy="strict-origin-when-cross-origin"
+          />
+        </div>
+      </section>
+
       {/* ── Trust & Security ───────────────────────────── */}
       <div className="trust-section">
         <div className="trust-inner">
