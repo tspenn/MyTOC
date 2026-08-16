@@ -1,5 +1,6 @@
 import { supabase } from './supabase'
 import { withRetry, isRlsError } from './retry'
+import { isFreeProfilesTier, tierDisplayName } from './signupApp'
 import type {
   Checklist,
   ChecklistAttachment,
@@ -608,12 +609,38 @@ export interface TrialStatus {
   has_subscription?: boolean
   plan_tier?: string | null
   subscription_status?: string | null
+  profiles_tier?: string | null
+  plan_label?: string
 }
 
 export async function fetchTrialStatus(): Promise<TrialStatus | null> {
   const { data, error } = await supabase.rpc('chkchk_get_trial_status')
   if (error || !data) return null
-  return data as TrialStatus
+  const status = data as TrialStatus
+
+  const { data: { user } } = await supabase.auth.getUser()
+  let profilesTier: string | null = null
+  if (user) {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('tier')
+      .eq('id', user.id)
+      .maybeSingle()
+    profilesTier = (profile?.tier as string | null | undefined) ?? null
+  }
+
+  // MyTOC billing lives on chkchk_subscriptions. profiles.tier is the shared
+  // Skyland signup marker — toc_free and sister-app free ids stay unpaid here.
+  const freeOnSharedProfile = isFreeProfilesTier(profilesTier)
+  const planLabel = status.has_subscription
+    ? (status.plan_tier ?? 'Paid')
+    : tierDisplayName(profilesTier)
+
+  return {
+    ...status,
+    profiles_tier: profilesTier,
+    plan_label: freeOnSharedProfile && !status.has_subscription ? 'Free' : planLabel,
+  }
 }
 
 // ---------------------------------------------------------------------------

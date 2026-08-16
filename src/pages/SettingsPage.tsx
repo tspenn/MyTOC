@@ -1,14 +1,23 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import InstallGuide from '../components/InstallGuide'
 import TeamPanel from '../components/TeamPanel'
 import { useAuth } from '../hooks/useAuth'
+import { fetchTrialStatus } from '../lib/checklistApi'
 
 type SettingsTab = 'howto' | 'team' | 'upgrade'
 
 export default function SettingsPage() {
   const { isTeamMember, isLead } = useAuth()
   const [tab, setTab] = useState<SettingsTab>('howto')
+  const [planLabel, setPlanLabel] = useState('Free')
+
+  useEffect(() => {
+    if (tab !== 'upgrade' || isTeamMember) return
+    void fetchTrialStatus().then((trial) => {
+      if (trial?.plan_label) setPlanLabel(trial.plan_label)
+    })
+  }, [tab, isTeamMember])
 
   return (
     <section className="page-card settings-page">
@@ -144,7 +153,8 @@ export default function SettingsPage() {
             <p className="muted-text">Only the account Lead can manage a subscription.</p>
           ) : (
             <p className="muted-text">
-              Compare plans and choose a subscription on the{' '}
+              Current plan: <strong>{planLabel}</strong>. Compare plans and choose a
+              subscription on the{' '}
               <Link to="/home#pricing">pricing page</Link>.
               Plan names are for billing only — your team always sees you as <strong>Lead</strong>.
             </p>

@@ -62,6 +62,7 @@ Deno.serve(async (req) => {
         team_signup: true,
         boss_code: boss_code.trim(),
         worker_number: worker_number.trim(),
+        signup_app: 'toc',
       },
     })
 
