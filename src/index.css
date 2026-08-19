@@ -1141,6 +1141,38 @@ a:hover { text-decoration: underline; color: var(--violet); }
   font: inherit;
   background: #ffffff;
 }
+.form-field-input-wrap {
+  position: relative;
+  display: block;
+}
+.form-field-input-wrap input {
+  padding-right: 2.75rem;
+}
+.password-toggle {
+  position: absolute;
+  right: 0.4rem;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: #6b7280;
+  cursor: pointer;
+  line-height: 0;
+}
+.password-toggle:hover {
+  color: #3f4654;
+}
+.password-toggle:focus-visible {
+  outline: 2px solid #a8c4dc;
+  outline-offset: 1px;
+}
 .form-field input:focus,
 .form-field select:focus,
 .form-field textarea:focus {
