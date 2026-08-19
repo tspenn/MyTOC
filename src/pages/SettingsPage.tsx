@@ -1,16 +1,25 @@
 import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import InstallGuide from '../components/InstallGuide'
 import TeamPanel from '../components/TeamPanel'
 import { useAuth } from '../hooks/useAuth'
 import { fetchTrialStatus } from '../lib/checklistApi'
+import PricingCta from '../components/PricingCta'
+import { PLANS, type BillingInterval } from '../lib/pricing'
 
 type SettingsTab = 'howto' | 'team' | 'upgrade'
 
 export default function SettingsPage() {
   const { isTeamMember, isLead } = useAuth()
-  const [tab, setTab] = useState<SettingsTab>('howto')
+  const [searchParams] = useSearchParams()
+  const initialTab = searchParams.get('tab') === 'upgrade' ? 'upgrade' : 'howto'
+  const [tab, setTab] = useState<SettingsTab>(initialTab)
   const [planLabel, setPlanLabel] = useState('Free')
+  const [billing, setBilling] = useState<BillingInterval>('monthly')
+
+  useEffect(() => {
+    if (searchParams.get('tab') === 'upgrade') setTab('upgrade')
+  }, [searchParams])
 
   useEffect(() => {
     if (tab !== 'upgrade' || isTeamMember) return
@@ -152,12 +161,42 @@ export default function SettingsPage() {
           {isTeamMember ? (
             <p className="muted-text">Only the account Lead can manage a subscription.</p>
           ) : (
+            <>
             <p className="muted-text">
-              Current plan: <strong>{planLabel}</strong>. Compare plans and choose a
-              subscription on the{' '}
-              <Link to="/home#pricing">pricing page</Link>.
+              Current plan: <strong>{planLabel}</strong>.
               Plan names are for billing only — your team always sees you as <strong>Lead</strong>.
+              Subscribe here whenever you are ready — even during the free trial.
+              Opens Stripe so you can pay or apply a coupon. The 14-day trial never asks for a card.
             </p>
+            <div className="billing-toggle billing-toggle-settings" role="group" aria-label="Billing interval">
+              <button
+                type="button"
+                className={billing === 'monthly' ? 'billing-toggle-btn billing-toggle-active' : 'billing-toggle-btn'}
+                onClick={() => setBilling('monthly')}
+              >
+                Monthly
+              </button>
+              <button
+                type="button"
+                className={billing === 'annual' ? 'billing-toggle-btn billing-toggle-active' : 'billing-toggle-btn'}
+                onClick={() => setBilling('annual')}
+              >
+                Annual <span className="billing-toggle-save">2 mo free</span>
+              </button>
+            </div>
+            <div className="settings-plan-grid">
+              {PLANS.map((plan) => (
+                <div key={plan.tier} className="settings-plan-card">
+                  <h3>{plan.name}</h3>
+                  <p className="muted-text small-text">
+                    ${billing === 'monthly' ? plan.monthlyPrice : plan.annualPrice}
+                    {billing === 'monthly' ? '/mo' : '/yr'}
+                  </p>
+                  <PricingCta plan={plan} interval={billing} variant={plan.featured ? 'gold' : 'primary'} mode="subscribe" />
+                </div>
+              ))}
+            </div>
+            </>
           )}
         </div>
       )}
