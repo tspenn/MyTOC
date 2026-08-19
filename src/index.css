@@ -357,6 +357,18 @@ a:hover { text-decoration: underline; color: var(--violet); }
   letter-spacing: -0.02em;
   color: var(--cream);
 }
+.detail-header .status-pill-active {
+  background: rgba(168, 196, 220, 0.18);
+  color: #d6e6f5;
+}
+.detail-header .status-pill-awaiting_confirmation {
+  background: rgba(244, 230, 192, 0.18);
+  color: var(--gold-light);
+}
+.detail-header .status-pill-archived {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--border);
+}
 .detail-header-actions {
   display: flex;
   align-items: center;
