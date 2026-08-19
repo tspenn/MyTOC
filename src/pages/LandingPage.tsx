@@ -1,11 +1,27 @@
-import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import InstallAppButton from '../components/InstallAppButton'
-import PricingCta from '../components/PricingCta'
-import { PLANS, type BillingInterval } from '../lib/pricing'
+
+const STARTER_FEATURES = [
+  '1 Lead account',
+  'Up to 5 Team Members',
+  'Unlimited Directives',
+  'Real-time status & confirmation',
+  'Clean audit trail',
+  'Push notifications',
+  'Mobile-first PWA',
+]
+
+const TEAM_FEATURES = [
+  '3 Lead accounts',
+  'Up to 25 Team Members',
+  'Unlimited Directives',
+  'Real-time status & confirmation',
+  'Clean audit trail',
+  'Push notifications',
+  'Priority support',
+]
 
 export default function LandingPage() {
-  const [billing, setBilling] = useState<BillingInterval>('monthly')
   return (
     <div className="landing">
 
@@ -114,72 +130,75 @@ export default function LandingPage() {
         <h2 className="section-title">Simple, transparent pricing</h2>
         <p className="section-sub">No hidden fees. Cancel any time.</p>
 
-        <div className="billing-toggle" role="group" aria-label="Billing interval">
-          <button
-            type="button"
-            className={billing === 'monthly' ? 'billing-toggle-btn billing-toggle-active' : 'billing-toggle-btn'}
-            onClick={() => setBilling('monthly')}
-          >
-            Monthly
-          </button>
-          <button
-            type="button"
-            className={billing === 'annual' ? 'billing-toggle-btn billing-toggle-active' : 'billing-toggle-btn'}
-            onClick={() => setBilling('annual')}
-          >
-            Annual <span className="billing-toggle-save">2 mo free</span>
-          </button>
-        </div>
-
         <div className="pricing-grid">
-          {PLANS.map((plan) => {
-            const price = billing === 'monthly' ? plan.monthlyPrice : plan.annualPrice
-            const period = billing === 'monthly' ? '/ month' : '/ year'
-            return (
-              <div
-                key={plan.tier}
-                className={plan.featured ? 'pricing-card pricing-card-featured' : 'pricing-card'}
-              >
-                {plan.featured && <div className="pricing-featured-badge">Best Value</div>}
 
-                <div className="pricing-card-header">
-                  <span className="pricing-tier-label">{plan.name}</span>
-                  <div className="pricing-amount">
-                    <span className="pricing-dollar">$</span>
-                    <span className="pricing-number">{price}</span>
-                    <span className="pricing-period">{period}</span>
-                  </div>
-                  {billing === 'monthly' ? (
-                    <div className="pricing-annual-note">
-                      or <strong>${plan.annualPrice} / year</strong>
-                      <span className="pricing-savings-pill">2 months free</span>
-                    </div>
-                  ) : (
-                    <div className="pricing-annual-note">
-                      <strong>${plan.monthlyPrice} / month</strong> if billed monthly
-                    </div>
-                  )}
-                  <p className="pricing-desc">{plan.description}</p>
-                </div>
-
-                <ul className="pricing-features">
-                  {plan.features.map((f) => (
-                    <li key={f}>
-                      <span className={plan.featured ? 'feature-check feature-check-gold' : 'feature-check'}>✓</span>
-                      {f}
-                    </li>
-                  ))}
-                </ul>
-
-                <PricingCta plan={plan} interval={billing} variant={plan.featured ? 'gold' : 'primary'} mode="start-trial" />
+          <div className="pricing-card">
+            <div className="pricing-card-header">
+              <span className="pricing-tier-label">Solo Command</span>
+              <div className="pricing-amount">
+                <span className="pricing-dollar">$</span>
+                <span className="pricing-number">19</span>
+                <span className="pricing-period">/ month</span>
               </div>
-            )
-          })}
+              <div className="pricing-annual-note">
+                or <strong>$190 / year</strong>
+                <span className="pricing-savings-pill">2 months free</span>
+              </div>
+              <p className="pricing-desc">
+                Built for the individual COO or executive who needs a personal command layer for their closest team members.
+              </p>
+            </div>
+
+            <ul className="pricing-features">
+              {STARTER_FEATURES.map((f) => (
+                <li key={f}>
+                  <span className="feature-check">✓</span>
+                  {f}
+                </li>
+              ))}
+            </ul>
+
+            <Link to="/signup" className="btn btn-primary btn-full pricing-cta">
+              Start Solo Command
+            </Link>
+          </div>
+
+          <div className="pricing-card pricing-card-featured">
+            <div className="pricing-featured-badge">Best Value</div>
+
+            <div className="pricing-card-header">
+              <span className="pricing-tier-label">Team Command</span>
+              <div className="pricing-amount">
+                <span className="pricing-dollar">$</span>
+                <span className="pricing-number">49</span>
+                <span className="pricing-period">/ month</span>
+              </div>
+              <div className="pricing-annual-note">
+                or <strong>$490 / year</strong>
+                <span className="pricing-savings-pill">2 months free</span>
+              </div>
+              <p className="pricing-desc">
+                Built for executive ops — COOs, chiefs of staff, and small cross-functional leadership groups.
+              </p>
+            </div>
+
+            <ul className="pricing-features">
+              {TEAM_FEATURES.map((f) => (
+                <li key={f}>
+                  <span className="feature-check feature-check-gold">✓</span>
+                  {f}
+                </li>
+              ))}
+            </ul>
+
+            <Link to="/signup" className="btn btn-gold btn-full pricing-cta">
+              Start Team Command
+            </Link>
+          </div>
         </div>
 
         <p className="pricing-trial-note">
           All plans include a <strong>14-day free trial</strong> — <strong>no credit card required</strong>.
-          Subscribe later from Settings → Upgrade.
         </p>
       </section>
 

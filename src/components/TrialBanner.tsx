@@ -22,7 +22,7 @@ export default function TrialBanner() {
     return (
       <div className="trial-banner trial-banner-expired" role="alert">
         <span>⏰ Your 14-day free trial has ended.</span>
-        <Link to="/settings?tab=upgrade" className="trial-banner-cta">Subscribe →</Link>
+        <Link to="/home#pricing" className="trial-banner-cta">Choose a plan →</Link>
       </div>
     )
   }
@@ -32,7 +32,7 @@ export default function TrialBanner() {
       <span>
         ⏳ {trial.days_remaining} day{trial.days_remaining !== 1 ? 's' : ''} left in your free trial.
       </span>
-      <Link to="/settings?tab=upgrade" className="trial-banner-cta">Upgrade →</Link>
+      <Link to="/home#pricing" className="trial-banner-cta">Upgrade →</Link>
       <button type="button" className="trial-banner-dismiss" aria-label="Dismiss" onClick={() => setDismissed(true)}>✕</button>
     </div>
   )

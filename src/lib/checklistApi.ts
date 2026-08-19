@@ -1,7 +1,6 @@
 import { supabase } from './supabase'
 import { withRetry, isRlsError } from './retry'
 import { isFreeProfilesTier, tierDisplayName } from './signupApp'
-import { planDisplayName } from './pricing'
 import type {
   Checklist,
   ChecklistAttachment,
@@ -638,7 +637,7 @@ export async function fetchTrialStatus(): Promise<TrialStatus | null> {
   // Skyland signup marker — toc_free and sister-app free ids stay unpaid here.
   const freeOnSharedProfile = isFreeProfilesTier(profilesTier)
   const planLabel = status.has_subscription
-    ? planDisplayName(status.plan_tier)
+    ? (status.plan_tier ?? 'Paid')
     : tierDisplayName(profilesTier)
 
   return {

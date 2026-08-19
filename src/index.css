@@ -1841,65 +1841,6 @@ a:hover { text-decoration: underline; color: var(--violet); }
 .feature-check-gold { background: rgba(72, 19, 189, 0.55); color: var(--gold-light); }
 
 .pricing-cta { margin-top: auto; }
-.pricing-cta-wrap { display: flex; flex-direction: column; gap: 0.5rem; margin-top: auto; }
-.pricing-cta-sub {
-  font-size: 0.78rem;
-  color: var(--muted);
-  text-align: center;
-  margin: 0;
-}
-.pricing-cta-error {
-  font-size: 0.82rem;
-  color: #a04840;
-  text-align: center;
-  margin: 0;
-}
-.billing-toggle {
-  display: flex;
-  justify-content: center;
-  gap: 0.5rem;
-  margin-bottom: 1.75rem;
-}
-.billing-toggle-settings { justify-content: flex-start; margin: 1rem 0; }
-.billing-toggle-btn {
-  border: 1px solid var(--border);
-  background: #fff;
-  color: var(--ink);
-  font: inherit;
-  font-weight: 600;
-  font-size: 0.88rem;
-  padding: 0.45rem 1rem;
-  border-radius: 999px;
-  cursor: pointer;
-}
-.billing-toggle-btn:hover { border-color: var(--blue); }
-.billing-toggle-active {
-  background: var(--blue);
-  border-color: var(--blue);
-  color: #fff;
-}
-.billing-toggle-save {
-  font-size: 0.72rem;
-  font-weight: 700;
-  margin-left: 0.25rem;
-  opacity: 0.9;
-}
-.settings-plan-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 1rem;
-  margin-top: 1rem;
-}
-.settings-plan-card {
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 1rem;
-  background: #fff;
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-.settings-plan-card h3 { margin: 0; font-size: 1rem; }
 .pricing-trial-note {
   text-align: center;
   color: var(--muted);
