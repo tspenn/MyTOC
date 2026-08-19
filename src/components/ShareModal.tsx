@@ -178,6 +178,9 @@ export default function ShareModal({
                         >
                           {copied === msgKey ? 'Message copied!' : 'Copy message'}
                         </button>
+                        <p className="muted-text small-text roster-invite-hint">
+                          Then send by email or text.
+                        </p>
                       </>
                     )}
 

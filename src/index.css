@@ -1980,6 +1980,7 @@ a:hover { text-decoration: underline; color: var(--violet); }
   }
   .share-roster-actions,
   .team-roster-actions { width: 100%; }
+  .roster-invite-hint { text-align: left; }
   .landing-section,
   .landing-section-full,
   .trust-section { padding-left: 1.25rem; padding-right: 1.25rem; }
@@ -2606,7 +2607,7 @@ a:hover { text-decoration: underline; color: var(--violet); }
 .team-roster-info { display: flex; flex-direction: column; gap: 0.25rem; }
 .team-status { font-size: 0.8rem; color: var(--muted); }
 .team-status-active { color: #16a34a; font-weight: 600; }
-.team-roster-actions { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.team-roster-actions { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; }
 .team-roster-actions a.btn {
   text-decoration: none;
   display: inline-flex;
@@ -2653,6 +2654,14 @@ a:hover { text-decoration: underline; color: var(--violet); }
   display: flex;
   flex-wrap: wrap;
   gap: 0.4rem;
+  align-items: center;
+}
+.roster-invite-hint {
+  flex-basis: 100%;
+  margin: 0.15rem 0 0;
+  font-size: 0.75rem;
+  line-height: 1.3;
+  text-align: right;
 }
 .share-roster-actions a.btn {
   text-decoration: none;

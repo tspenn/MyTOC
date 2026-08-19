@@ -156,6 +156,9 @@ export default function TeamPanel() {
                       >
                         {copied === smsKey ? 'Message copied!' : 'Copy message'}
                       </button>
+                      <p className="muted-text small-text roster-invite-hint">
+                        Then send by email or text.
+                      </p>
                     </div>
                   )}
                 </li>
