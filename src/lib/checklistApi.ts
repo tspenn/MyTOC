@@ -583,11 +583,15 @@ export async function updateDisplayName(displayName: string): Promise<void> {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) throw new Error('Not authenticated')
 
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from('chkchk_user_roles')
-    .upsert({ user_id: user.id, display_name: displayName.trim() })
+    .update({ display_name: displayName.trim() })
+    .eq('user_id', user.id)
+    .select('user_id')
+    .maybeSingle()
 
-  if (error) throw error
+  if (error) throw new Error(error.message)
+  if (!data) throw new Error('Could not save name. Your account role is not set up yet.')
 }
 
 export async function updateLeadAvailability(isAvailable: boolean): Promise<void> {
