@@ -139,8 +139,10 @@ export default function SignupPage() {
       <form className="auth-form" onSubmit={handleSubmit}>
         {error === '__existing__' ? (
           <div className="alert alert-existing">
-            That email already has an account.{' '}
-            <a href="/login" className="alert-existing-link">Log in instead →</a>
+            That email already has an account, so the password you just typed was not saved.{' '}
+            <a href="/login" className="alert-existing-link">Sign in</a>
+            {' '}with your original password, or{' '}
+            <a href="/forgot-password" className="alert-existing-link">reset it</a>.
           </div>
         ) : (
           error && <Alert variant="error" message={error} />

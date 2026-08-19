@@ -8,7 +8,7 @@ export function getAuthErrorMessage(error: unknown, fallback = 'Something went w
   const normalized = message.toLowerCase()
 
   if (normalized.includes('invalid login credentials')) {
-    return 'Invalid email or password.'
+    return 'Invalid email or password. If you just tried to sign up, that new password was not saved — use Forgot password.'
   }
   if (normalized.includes('user already registered')) {
     return 'An account with this email already exists.'
