@@ -55,7 +55,7 @@ a {
 a:hover { text-decoration: underline; color: var(--violet); }
 
 .font-ink {
-  font-family: 'Caveat', 'Ink Free', 'Comic Sans MS', cursive;
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   font-weight: 700;
 }
 
@@ -115,15 +115,15 @@ a:hover { text-decoration: underline; color: var(--violet); }
   mix-blend-mode: screen;
 }
 .app-logo-text {
-  font-family: 'Caveat', 'Ink Free', cursive;
-  font-size: 3.2rem;
-  font-weight: 700;
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 1.35rem;
+  font-weight: 800;
   color: var(--gold);
-  letter-spacing: 0.01em;
+  letter-spacing: -0.03em;
   line-height: 1;
 }
 @media (max-width: 640px) {
-  .app-logo-text { font-size: 2.2rem; }
+  .app-logo-text { font-size: 1.15rem; }
   .app-logo-img { height: 34px; }
   .app-logo-mark { width: 30px; height: 30px; }
 }
@@ -230,9 +230,10 @@ a:hover { text-decoration: underline; color: var(--violet); }
   border: 2px solid #3f4654;
   border-radius: 8px;
   color: var(--muted-soft);
-  font-family: 'Caveat', 'Ink Free', cursive;
-  font-size: 1.15rem;
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 0.8rem;
   font-weight: 700;
+  letter-spacing: 0.01em;
   text-decoration: none;
   transition: all 0.15s;
 }
@@ -250,8 +251,8 @@ a:hover { text-decoration: underline; color: var(--violet); }
 .bottom-nav-icon { font-size: 1rem; }
 .bottom-nav-chick { width: 22px; height: 22px; object-fit: contain; border-radius: 3px; }
 .bottom-nav-brand {
-  font-family: 'Caveat', 'Ink Free', cursive;
-  font-size: 1.15rem;
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 0.8rem;
   font-weight: 700;
   color: var(--gold);
   line-height: 1;
@@ -295,9 +296,10 @@ a:hover { text-decoration: underline; color: var(--violet); }
 }
 .banner-title {
   margin: 0 0 0.2rem;
-  font-family: 'Caveat', 'Ink Free', cursive;
-  font-size: 1.75rem;
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 1.35rem;
   font-weight: 700;
+  letter-spacing: -0.02em;
   color: var(--cream);
 }
 .banner-sub {
@@ -339,17 +341,20 @@ a:hover { text-decoration: underline; color: var(--violet); }
   flex-wrap: wrap;
 }
 .detail-order-label {
-  font-family: 'Caveat', 'Ink Free', cursive;
-  font-size: 1.3rem;
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 0.72rem;
   font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
   color: var(--gold);
   white-space: nowrap;
 }
 .detail-title {
   margin: 0;
-  font-family: 'Caveat', 'Ink Free', cursive;
-  font-size: 1.6rem;
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 1.2rem;
   font-weight: 700;
+  letter-spacing: -0.02em;
   color: var(--cream);
 }
 .detail-header-actions {
@@ -594,10 +599,10 @@ a:hover { text-decoration: underline; color: var(--violet); }
 }
 .sidebar-header h2 {
   margin: 0;
-  font-family: 'Caveat', 'Ink Free', cursive;
-  font-size: 1.2rem;
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 0.95rem;
   font-weight: 700;
-  letter-spacing: 0.03em;
+  letter-spacing: 0.01em;
   color: #ffffff;
 }
 
@@ -884,9 +889,10 @@ a:hover { text-decoration: underline; color: var(--violet); }
 }
 .messages-panel-header h2 {
   margin: 0;
-  font-family: 'Caveat', 'Ink Free', cursive;
-  font-size: 1.2rem;
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 0.95rem;
   font-weight: 700;
+  letter-spacing: 0.01em;
   color: #ffffff;
 }
 .messages-panel-title { font-weight: 700; }
@@ -1521,12 +1527,12 @@ a:hover { text-decoration: underline; color: var(--violet); }
 
 .hero-brand-text {
   margin: 0 0 0.75rem;
-  font-family: 'Caveat', 'Ink Free', cursive;
-  font-size: clamp(2.8rem, 7vw, 3.8rem);
-  font-weight: 700;
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: clamp(2rem, 5vw, 2.75rem);
+  font-weight: 800;
   color: var(--gold);
   line-height: 1;
-  letter-spacing: 0.02em;
+  letter-spacing: -0.03em;
   text-shadow: 0 2px 18px rgba(0, 0, 0, 0.55);
 }
 .hero-brand-star {
@@ -1935,7 +1941,7 @@ a:hover { text-decoration: underline; color: var(--violet); }
   .detail-chick { display: none; }
   .detail-header-actions { width: 100%; }
   .bottom-nav-tab {
-    font-size: 1rem;
+    font-size: 0.75rem;
     padding: 0.45rem 0.4rem;
     gap: 0.2rem;
   }
