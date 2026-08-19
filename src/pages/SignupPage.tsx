@@ -13,6 +13,7 @@ import {
   setMyRole,
 } from '../lib/checklistApi'
 import { clearPendingCoLeadInvite, clearPendingLeadSignup, savePendingCoLeadInvite, savePendingLeadSignup } from '../lib/leadBootstrap'
+import { tocAuthRedirect } from '../lib/authRedirect'
 import { SIGNUP_APP_ID } from '../lib/signupApp'
 import { supabase } from '../lib/supabase'
 import { useAuthStore } from '../stores/authStore'
@@ -90,6 +91,7 @@ export default function SignupPage() {
       password,
       options: {
         data: { signup_app: SIGNUP_APP_ID },
+        emailRedirectTo: tocAuthRedirect('/login'),
       },
     })
 

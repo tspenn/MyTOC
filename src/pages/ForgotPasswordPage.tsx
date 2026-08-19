@@ -4,6 +4,7 @@ import Alert from '../components/Alert'
 import AuthLayout from '../components/AuthLayout'
 import FormField from '../components/FormField'
 import { supabase } from '../lib/supabase'
+import { tocAuthRedirect } from '../lib/authRedirect'
 
 export default function ForgotPasswordPage() {
   const [email,   setEmail]   = useState('')
@@ -19,7 +20,7 @@ export default function ForgotPasswordPage() {
 
     const { error: resetError } = await supabase.auth.resetPasswordForEmail(
       email.trim(),
-      { redirectTo: `${window.location.origin}/reset-password` },
+      { redirectTo: tocAuthRedirect('/reset-password') },
     )
 
     setLoading(false)

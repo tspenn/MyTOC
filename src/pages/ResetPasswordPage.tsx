@@ -1,4 +1,4 @@
-import { FormEvent, useState } from 'react'
+import { FormEvent, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Alert from '../components/Alert'
 import AuthLayout from '../components/AuthLayout'
@@ -10,7 +10,33 @@ export default function ResetPasswordPage() {
   const [password,        setPassword]        = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [loading,         setLoading]         = useState(false)
+  const [ready,           setReady]           = useState(false)
   const [error,           setError]           = useState<string | null>(null)
+
+  useEffect(() => {
+    let cancelled = false
+
+    void supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!cancelled && session) setReady(true)
+    })
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (cancelled || !session) return
+      if (event === 'PASSWORD_RECOVERY' || event === 'SIGNED_IN' || event === 'INITIAL_SESSION') {
+        setReady(true)
+      }
+    })
+
+    const timeout = window.setTimeout(() => {
+      if (!cancelled) setReady(true)
+    }, 1500)
+
+    return () => {
+      cancelled = true
+      window.clearTimeout(timeout)
+      subscription.unsubscribe()
+    }
+  }, [])
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -53,7 +79,7 @@ export default function ResetPasswordPage() {
           onChange={setConfirmPassword}
           autoComplete="new-password"
         />
-        <button type="submit" className="btn btn-primary btn-full" disabled={loading}>
+        <button type="submit" className="btn btn-primary btn-full" disabled={loading || !ready}>
           {loading ? 'Saving…' : 'Set new password'}
         </button>
       </form>
